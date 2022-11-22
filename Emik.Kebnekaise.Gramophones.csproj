@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net452</TargetFramework>
+        <Description>Celeste/Everest Mod that allows you to play any FMOD bank, anywhere.</Description>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="FNA" HintPath="../../../../FNA.dll" Private="false" />
+        <Reference Include="Celeste" HintPath="../../../../Celeste.exe" Private="false" />
+        <Reference Include="DotNetZip" HintPath="../../../../DotNetZip.dll" Private="false" />
+        <Reference Include="YamlDotNet" HintPath="../../../../YamlDotNet.dll" Private="false" />
+        <Reference Include="MonoMod.Utils" HintPath="../../../../MonoMod.Utils.dll" Private="false" />
+        <Reference Include="MMHOOK_Celeste" HintPath="../../../../MMHOOK_Celeste.dll" Private="false" />
+        <Reference Include="Emik.Results" HintPath="$(SharedPath)Emik.Results\bin\net45\Emik.Results.dll" />
+    </ItemGroup>
+</Project>
