@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<assembly name="Emik.Kebnekaise.Gramophones">
+  <member name="P:Emik.Kebnekaise.Gramophones.GramophoneSettings.Step">
+    <attribute ctor="M:JetBrains.Annotations.ValueRangeAttribute.#ctor(System.Int64,System.Int64)" />
+  </member>
+</assembly>
