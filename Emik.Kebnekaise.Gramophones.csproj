@@ -4,6 +4,6 @@
         <Description>Celeste/Everest Mod that allows you to play any FMOD bank, anywhere.</Description>
     </PropertyGroup>
     <ItemGroup>
-        <Reference Include="Emik.Results" HintPath="$(SharedPath)Emik.Results\bin\net45\Emik.Results.dll" />
+        <Reference Include="Emik.Results" HintPath="$(SharedPath)Emik.Results\bin\net452\Emik.Results.dll" />
     </ItemGroup>
 </Project>

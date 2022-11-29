@@ -15,7 +15,7 @@ static class Searcher
     internal static IList<string?> Song => s_songs ??= Songs().ToGuardedLazily();
 
     internal static void Rearrange() => // ReSharper disable once AssignmentInConditionalExpression
-        s_songs = ((IsSorted = !IsSorted) ? s_songs?.OrderBy(Sorter) : s_songs?.Shuffle() as IEnumerable<string?>)
+        s_songs = ((IsSorted = !IsSorted) ? s_songs?.OrderBy(Self) : s_songs?.Shuffle() as IEnumerable<string?>)
           ?.ToGuardedLazily();
 
     static IEnumerable<string?> Songs()
@@ -37,14 +37,8 @@ static class Searcher
 
         static IEnumerable<ZipFile> AllFiles(string? x) => Please.Try(ZipFile.Read, x);
 
-        const string Zip = "*.zip";
-
-        var location = Everest.Loader.PathMods;
-
-#pragma warning disable MA0029
         return Please
-#pragma warning restore MA0029
-           .Try(Directory.GetFiles, location, Zip)
+           .Try(Directory.GetFiles, Everest.Loader.PathMods, "*.zip")
            .SelectMany(Enumerable.AsEnumerable)
            .Select(AllFiles)
            .SelectMany(Enumerable.AsEnumerable)
@@ -54,10 +48,10 @@ static class Searcher
            .Where(Desired)
            .Where(HasParams)
            .Distinct(StringComparer.OrdinalIgnoreCase)
-           .OrderBy(Sorter)
+           .OrderBy(Self)
            .ToList()
            .For(Log);
     }
 
-    static string? Sorter(string? x) => x;
+    static string? Self(string? x) => x;
 }
