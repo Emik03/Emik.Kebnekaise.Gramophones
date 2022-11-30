@@ -12,8 +12,6 @@ static class Gramophone
 
     static Item? s_ambience;
 
-    static Option<int>? s_slider;
-
     internal static bool IsPlaying { get; set; }
 
     internal static string? Previous { get; set; }
@@ -22,9 +20,7 @@ static class Gramophone
 
     internal static Item ItemAmbience => s_ambience ??= new Button(Localized.Ambience).Pressed(MuteAmbience);
 
-    internal static Option<int> ItemStep =>
-        s_slider ??= new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step)
-           .Change(static x => GramophoneModule.Settings.Step = x);
+    internal static Option<int>? ItemStep { get; private set; }
 
     static Celeste.AudioState AudioSession => ((Level)Engine.Scene).Session.Audio;
 
@@ -149,10 +145,18 @@ static class Gramophone
 
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
     {
-        const int MaxLength = 30;
+        const int MaxLength = 31;
 
         static string Friendly(int i) =>
-            i.Index()?.Replace("music:/", "").Reverse().Take(MaxLength).Reverse().Conjoin() ?? Localized.None;
+            i.Index()
+              ?.Replace("music:/", "")
+               .Reverse()
+               .Take(MaxLength)
+               .Concat(new[] { '\u2026' })
+               .Take(MaxLength + 1)
+               .Reverse()
+               .Conjoin() ??
+            Localized.None;
 
         void Change(int x)
         {
@@ -166,6 +170,7 @@ static class Gramophone
             s_old?.Select(menu.Remove).Enumerate();
             s_old = s_parameters?.Select(Item).ToList();
             s_old?.Select(menu.Add).Enumerate();
+            s_old?.For(x => x.OnUpdate());
         }
 
         void Enter() => Audio.EndSnapshot(pause);
@@ -190,15 +195,35 @@ static class Gramophone
         int index = Searcher.Song.IndexOf(Current),
             upper = Searcher.Song.Count - 1;
 
+        var song = new Slider(Localized.Song, Friendly, 0, upper, index);
+
+        var shuffle = new Button(Searcher.IsSorted ? Localized.Shuffle : Localized.Sort).Pressed(
+            () =>
+            {
+                Searcher.Rearrange();
+                song.OnValueChange(0);
+            }
+        );
+
+        var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step).Change(
+            x =>
+            {
+                GramophoneModule.Settings.Step = x;
+                song.OnValueChange(0);
+            }
+        );
+
+        ItemStep = step;
+
         new[]
             {
                 new Header(Localized.Gramo),
                 new SubHeader(Localized.Which),
                 new Button(Localized.Stop).Pressed(Stop),
-                new Button(Searcher.IsSorted ? Localized.Shuffle : Localized.Sort).Pressed(Searcher.Rearrange),
                 ItemAmbience,
-                ItemStep,
-                new Slider(Localized.Song, Friendly, 0, upper, index).Change(Change).Enter(Enter).Leave(Leave),
+                shuffle,
+                step,
+                song.Change(Change).Enter(Enter).Leave(Leave),
             }
            .Select(menu.Add)
            .Enumerate();
