@@ -97,7 +97,7 @@ static class Gramophone
         IsPlaying = false;
         Set(song, true);
         Current = song;
-        s_parameters = Audio.CurrentMusicEventInstance.Parameters().ToList();
+        s_parameters = Audio.CurrentMusicEventInstance.Parameters().OrderBy(Name).ToList();
     }
 
     internal static void Stop() => Set(Previous, false);
@@ -188,6 +188,12 @@ static class Gramophone
            .Conjoin()
             : Localized.None;
 
+    static string Name(this ParameterInstance parameter)
+    {
+        parameter.getDescription(out var description);
+        return description.name;
+    }
+
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
     {
         void Change(int x)
@@ -212,11 +218,10 @@ static class Gramophone
             const int MaxValue = 1000;
 
             p.getValue(out var cur);
-            p.getDescription(out var desc);
 
             var step = (float)GramophoneModule.Settings.Step;
 
-            return new Slider(desc.name, i => Math.Round(i / step, 2).Stringify(), 0, MaxValue, (int)(cur * step))
+            return new Slider(p.Name(), i => Math.Round(i / step, 2).Stringify(), 0, MaxValue, (int)(cur * step))
                .Change(i => p.setValue(i / step))
                .Enter(Enter)
                .Leave(Leave);
