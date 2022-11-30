@@ -100,7 +100,7 @@ static class Gramophone
 
     internal static void Stop() => Set(Previous, false);
 
-    static void AddItems(this TextMenu menu, Slider song, int index)
+    static void AddItems(this TextMenu menu, Slider song, Action onChange)
     {
         var shuffle = new Button(Searcher.IsSorted ? Localized.Shuffle : Localized.Sort).Pressed(
             () =>
@@ -114,7 +114,7 @@ static class Gramophone
             x =>
             {
                 GramophoneModule.Settings.Step = x;
-                song.OnValueChange(index);
+                onChange();
             }
         );
 
@@ -224,7 +224,7 @@ static class Gramophone
         var song = new Slider(Localized.Song, Friendly, 0, upper, index);
         _ = song.Change(Change).Enter(Enter).Leave(Leave);
 
-        menu.AddItems(song, index);
+        menu.AddItems(song, Refresh);
         Refresh();
 
         return menu;
