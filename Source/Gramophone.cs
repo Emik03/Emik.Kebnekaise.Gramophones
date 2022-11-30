@@ -100,7 +100,7 @@ static class Gramophone
 
     internal static void Stop() => Set(Previous, false);
 
-    static void AddItems(TextMenu menu, Slider song)
+    static void AddItems(this TextMenu menu, Slider song, int index)
     {
         var shuffle = new Button(Searcher.IsSorted ? Localized.Shuffle : Localized.Sort).Pressed(
             () =>
@@ -114,7 +114,7 @@ static class Gramophone
             x =>
             {
                 GramophoneModule.Settings.Step = x;
-                song.OnValueChange(0);
+                song.OnValueChange(index);
             }
         );
 
@@ -175,15 +175,14 @@ static class Gramophone
     }
 
     static string Friendly(int i) =>
-        i.Index()
-          ?.Replace("music:/", "")
+        i.Index()?.Replace("music:/", "") is { } wide
+            ? (wide.Reverse().Take(MaxLength) is var thin &&
+                wide.Length > MaxLength
+                    ? thin.Concat(new[] { '\u2026' })
+                    : thin)
            .Reverse()
-           .Take(MaxLength)
-           .Concat(new[] { '\u2026' })
-           .Take(MaxLength + 1)
-           .Reverse()
-           .Conjoin() ??
-        Localized.None;
+           .Conjoin()
+            : Localized.None;
 
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
     {
@@ -198,7 +197,6 @@ static class Gramophone
             s_old?.Select(menu.Remove).Enumerate();
             s_old = s_parameters?.Select(Item).ToList();
             s_old?.Select(menu.Add).Enumerate();
-            s_old?.For(x => x.OnUpdate());
         }
 
         void Enter() => Audio.EndSnapshot(pause);
@@ -226,7 +224,7 @@ static class Gramophone
         var song = new Slider(Localized.Song, Friendly, 0, upper, index);
         _ = song.Change(Change).Enter(Enter).Leave(Leave);
 
-        AddItems(menu, song);
+        menu.AddItems(song, index);
         Refresh();
 
         return menu;
