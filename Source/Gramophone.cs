@@ -23,6 +23,8 @@ static class Gramophone
 
     static Celeste.AudioState AudioSession => ((Level)Engine.Scene).Session.Audio;
 
+    static Localized.LocalString Label => Searcher.IsSorted ? Localized.Shuffle : Localized.Sort;
+
     internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self)
     {
         if (!IsPlaying)
@@ -102,7 +104,7 @@ static class Gramophone
 
     static void AddItems(this TextMenu menu, Item song, Action onChange)
     {
-        var shuffle = new Button(Searcher.IsSorted ? Localized.Shuffle : Localized.Sort);
+        var shuffle = new Button(Label);
 
         var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step).Change(
             x =>
@@ -115,8 +117,9 @@ static class Gramophone
         _ = shuffle.Pressed(
             () =>
             {
-                shuffle.Update();
                 Searcher.Rearrange();
+                shuffle.Label = Label;
+                shuffle.Update();
                 onChange();
             }
         );
