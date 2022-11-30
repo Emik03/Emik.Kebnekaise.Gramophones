@@ -100,20 +100,23 @@ static class Gramophone
 
     internal static void Stop() => Set(Previous, false);
 
-    static void AddItems(this TextMenu menu, Slider song, Action onChange)
+    static void AddItems(this TextMenu menu, Item song, Action onChange)
     {
-        var shuffle = new Button(Searcher.IsSorted ? Localized.Shuffle : Localized.Sort).Pressed(
-            () =>
-            {
-                Searcher.Rearrange();
-                song.OnValueChange(0);
-            }
-        );
+        var shuffle = new Button(Searcher.IsSorted ? Localized.Shuffle : Localized.Sort);
 
         var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step).Change(
             x =>
             {
                 GramophoneModule.Settings.Step = x;
+                onChange();
+            }
+        );
+
+        _ = shuffle.Pressed(
+            () =>
+            {
+                shuffle.Update();
+                Searcher.Rearrange();
                 onChange();
             }
         );
@@ -166,9 +169,7 @@ static class Gramophone
         {
             menu.Shut();
             Engine.FreezeTimer = 0.15f;
-
-            if (level != null)
-                level.Paused = false;
+            _ = level is not null && (level.Paused = false);
         };
 
         level?.Add(menu);
@@ -212,7 +213,7 @@ static class Gramophone
 
             var step = (float)GramophoneModule.Settings.Step;
 
-            return new Slider(desc.name, i => Math.Round(i / step, 3).Stringify(), 0, MaxValue, (int)(cur * step))
+            return new Slider(desc.name, i => Math.Round(i / step, 2).Stringify(), 0, MaxValue, (int)(cur * step))
                .Change(i => p.setValue(i / step))
                .Enter(Enter)
                .Leave(Leave);
@@ -224,7 +225,7 @@ static class Gramophone
         var song = new Slider(Localized.Song, Friendly, 0, upper, index);
         _ = song.Change(Change).Enter(Enter).Leave(Leave);
 
-        menu.AddItems(song, Refresh);
+        menu.AddItems(song, () => song.OnValueChange(Searcher.Song.IndexOf(Current)));
         Refresh();
 
         return menu;
