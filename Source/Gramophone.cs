@@ -228,7 +228,15 @@ static class Gramophone
         var song = new Slider(Localized.Song, Friendly, 0, upper, index);
         _ = song.Change(Change).Enter(Enter).Leave(Leave);
 
-        menu.AddItems(song, () => song.OnValueChange(Searcher.Song.IndexOf(Current)));
+        menu.AddItems(
+            song,
+            () =>
+            {
+                song.OnValueChange(Searcher.Song.IndexOf(Current));
+                song.Update();
+            }
+        );
+
         Refresh();
 
         return menu;
