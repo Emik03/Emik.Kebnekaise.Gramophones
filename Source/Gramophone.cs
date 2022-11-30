@@ -97,6 +97,38 @@ static class Gramophone
 
     internal static void Stop() => Set(Previous, false);
 
+    static void AddItems(TextMenu menu, Slider song)
+    {
+        var shuffle = new Button(Searcher.IsSorted ? Localized.Shuffle : Localized.Sort).Pressed(
+            () =>
+            {
+                Searcher.Rearrange();
+                song.OnValueChange(0);
+            }
+        );
+
+        var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step).Change(
+            x =>
+            {
+                GramophoneModule.Settings.Step = x;
+                song.OnValueChange(0);
+            }
+        );
+
+        new[]
+            {
+                new Header(Localized.Gramo),
+                new SubHeader(Localized.Which),
+                new Button(Localized.Stop).Pressed(Stop),
+                new Button(Localized.Ambience).Pressed(MuteAmbience),
+                shuffle,
+                step,
+                song,
+            }
+           .Select(menu.Add)
+           .Enumerate();
+    }
+
     static void MuteAmbience()
     {
         Audio.SetAmbience("");
@@ -155,7 +187,6 @@ static class Gramophone
         void Change(int x)
         {
             Play(Searcher.Song[x]);
-
             Refresh();
         }
 
@@ -190,36 +221,9 @@ static class Gramophone
             upper = Searcher.Song.Count - 1;
 
         var song = new Slider(Localized.Song, Friendly, 0, upper, index);
+        _ = song.Change(Change).Enter(Enter).Leave(Leave);
 
-        var shuffle = new Button(Searcher.IsSorted ? Localized.Shuffle : Localized.Sort).Pressed(
-            () =>
-            {
-                Searcher.Rearrange();
-                song.OnValueChange(0);
-            }
-        );
-
-        var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step).Change(
-            x =>
-            {
-                GramophoneModule.Settings.Step = x;
-                song.OnValueChange(0);
-            }
-        );
-
-        new[]
-            {
-                new Header(Localized.Gramo),
-                new SubHeader(Localized.Which),
-                new Button(Localized.Stop).Pressed(Stop),
-                new Button(Localized.Ambience).Pressed(MuteAmbience),
-                shuffle,
-                step,
-                song.Change(Change).Enter(Enter).Leave(Leave),
-            }
-           .Select(menu.Add)
-           .Enumerate();
-
+        AddItems(menu, song);
         Refresh();
 
         return menu;
