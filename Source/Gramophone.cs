@@ -8,6 +8,9 @@ static class Gramophone
 {
     const int MaxLength = 31;
 
+    // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
+    static IList<Item>? s_items;
+
     static IList<Item>? s_old;
 
     static IList<ParameterInstance>? s_parameters;
@@ -115,18 +118,18 @@ static class Gramophone
             }
         );
 
-        new[]
-            {
-                new Header(Localized.Gramo),
-                new SubHeader(Localized.Which),
-                new Button(Localized.Stop).Pressed(Stop),
-                new Button(Localized.Ambience).Pressed(MuteAmbience),
-                shuffle,
-                step,
-                song,
-            }
-           .Select(menu.Add)
-           .Enumerate();
+        s_items = new[]
+        {
+            new Header(Localized.Gramo),
+            new SubHeader(Localized.Which),
+            new Button(Localized.Stop).Pressed(Stop),
+            new Button(Localized.Ambience).Pressed(MuteAmbience),
+            shuffle,
+            step,
+            song,
+        };
+
+        s_items.Select(menu.Add).Enumerate();
     }
 
     static void MuteAmbience()
