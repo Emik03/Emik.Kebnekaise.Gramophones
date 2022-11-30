@@ -28,14 +28,11 @@ public sealed class GramophoneModule : EverestModule
     {
         base.CreateModMenuSection(menu, inGame, snapshot);
 
-        Item
-            itemEnable = new OnOff(Localized.Enable, Settings.Enabled).Change(static x => Settings.Enabled = x),
-            itemMenu = new OnOff(Localized.Menu, Settings.Menu).Change(static x => Settings.Menu = x);
-
-        menu?
-           .Add(itemEnable)
-           .Add(itemMenu)
-           .Add(Gramophone.ItemStep);
+        new Item[]
+        {
+            new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
+            new OnOff(Localized.Menu, Settings.Menu).Change(x => Settings.Menu = x),
+        }.For(x => menu?.Add(x));
     }
 
     public override void Load()

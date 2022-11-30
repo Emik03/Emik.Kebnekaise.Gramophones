@@ -6,21 +6,17 @@ namespace Emik.Kebnekaise.Gramophones;
 
 static class Gramophone
 {
+    const int MaxLength = 31;
+
     static IList<Item>? s_old;
 
     static IList<ParameterInstance>? s_parameters;
-
-    static Item? s_ambience;
 
     internal static bool IsPlaying { get; set; }
 
     internal static string? Previous { get; set; }
 
     internal static string? Current { get; set; }
-
-    internal static Item ItemAmbience => s_ambience ??= new Button(Localized.Ambience).Pressed(MuteAmbience);
-
-    internal static Option<int>? ItemStep { get; private set; }
 
     static Celeste.AudioState AudioSession => ((Level)Engine.Scene).Session.Audio;
 
@@ -90,7 +86,7 @@ static class Gramophone
 
     internal static void Play(string? song)
     {
-        _ = IsPlaying.NotThen(static () => Previous = Audio.CurrentMusic);
+        _ = IsPlaying.NotThen(() => Previous = Audio.CurrentMusic);
 
         // Temporarily assign to false to allow the song to be played.
         IsPlaying = false;
@@ -143,21 +139,19 @@ static class Gramophone
         level?.Add(menu);
     }
 
+    static string Friendly(int i) =>
+        i.Index()
+          ?.Replace("music:/", "")
+           .Reverse()
+           .Take(MaxLength)
+           .Concat(new[] { '\u2026' })
+           .Take(MaxLength + 1)
+           .Reverse()
+           .Conjoin() ??
+        Localized.None;
+
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
     {
-        const int MaxLength = 31;
-
-        static string Friendly(int i) =>
-            i.Index()
-              ?.Replace("music:/", "")
-               .Reverse()
-               .Take(MaxLength)
-               .Concat(new[] { '\u2026' })
-               .Take(MaxLength + 1)
-               .Reverse()
-               .Conjoin() ??
-            Localized.None;
-
         void Change(int x)
         {
             Play(Searcher.Song[x]);
@@ -213,14 +207,12 @@ static class Gramophone
             }
         );
 
-        ItemStep = step;
-
         new[]
             {
                 new Header(Localized.Gramo),
                 new SubHeader(Localized.Which),
                 new Button(Localized.Stop).Pressed(Stop),
-                ItemAmbience,
+                new Button(Localized.Ambience).Pressed(MuteAmbience),
                 shuffle,
                 step,
                 song.Change(Change).Enter(Enter).Leave(Leave),
