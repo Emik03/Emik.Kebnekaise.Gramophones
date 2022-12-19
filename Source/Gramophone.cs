@@ -63,7 +63,7 @@ static class Gramophone
     }
 
     internal static void SetMusicParam(On.Celeste.Audio.orig_SetMusicParam? orig, string? path, float value) =>
-        (s_allowParams || IsPlaying).NotThen(orig)?.Invoke(path, value);
+        (s_allowParams || !IsPlaying).Then(orig)?.Invoke(path, value);
 
     internal static void SetParameter(
         OnAudio.orig_SetParameter orig,
