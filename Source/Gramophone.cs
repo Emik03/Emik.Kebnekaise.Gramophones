@@ -8,6 +8,8 @@ static class Gramophone
 {
     const int MaxLength = 31;
 
+    static bool s_allowParams;
+
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
     static IList<Item>? s_items;
 
@@ -61,7 +63,7 @@ static class Gramophone
     }
 
     internal static void SetMusicParam(On.Celeste.Audio.orig_SetMusicParam? orig, string? path, float value) =>
-        IsPlaying.NotThen(orig)?.Invoke(path, value);
+        (s_allowParams || IsPlaying).NotThen(orig)?.Invoke(path, value);
 
     internal static void SetParameter(
         OnAudio.orig_SetParameter orig,
@@ -131,6 +133,7 @@ static class Gramophone
             new Button(Localized.Stop).Pressed(Stop),
             new Button(Localized.Ambience).Pressed(MuteAmbience),
             shuffle,
+            new OnOff(Localized.Params, s_allowParams).Change(x => s_allowParams = x),
             step,
             song,
         };

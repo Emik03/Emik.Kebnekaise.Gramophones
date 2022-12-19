@@ -16,6 +16,8 @@ static class Localized
 
     internal static LocalString None { get; } = new(nameof(None));
 
+    internal static LocalString Params { get; } = new(nameof(Params));
+
     internal static LocalString Shuffle { get; } = new(nameof(Shuffle));
 
     internal static LocalString Song { get; } = new(nameof(Song));
@@ -28,15 +30,11 @@ static class Localized
 
     internal static LocalString Which { get; } = new(nameof(Which));
 
-    internal readonly struct LocalString
+    internal readonly record struct LocalString(string Key)
     {
-        readonly string _key;
-
-        public LocalString(string k) => _key = k;
-
         public static implicit operator string(LocalString localString)
         {
-            var name = $"{nameof(Gramophone)}_{localString._key}";
+            var name = $"{nameof(Gramophone)}_{localString.Key}";
             return Dialog.Clean(name);
         }
     }
