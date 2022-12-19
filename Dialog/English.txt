@@ -1,0 +1,35 @@
+Gramophone_Ambience=
+Mute Ambience
+
+Gramophone_Enable=
+Enabled
+
+Gramophone_Gramo=
+Gramophone
+
+Gramophone_Menu=
+Show in Menu
+
+Gramophone_None=
+None
+
+Gramophone_Params=
+Allow map to change song parameter values
+
+Gramophone_Shuffle=
+Sort the songs randomly
+
+Gramophone_Song=
+Song
+
+Gramophone_Sort=
+Sort the songs alphabetically
+
+Gramophone_Step=
+Number of steps per FMOD unit
+
+Gramophone_Stop=
+Stop
+
+Gramophone_Which=
+Which song do you want to play?

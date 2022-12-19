@@ -1,0 +1,35 @@
+Gramophone_Ambience=
+o weka e kalama kon
+
+Gramophone_Enable=
+o kepeken
+
+Gramophone_Gramo=
+ilo pi kalama musi
+
+Gramophone_Menu=
+o ken lukin
+
+Gramophone_None=
+ala
+
+Gramophone_Params=
+musi ken ante e nanpa
+
+Gramophone_Shuffle=
+o pali nasa e nanpa
+
+Gramophone_Song=
+kalama musi
+
+Gramophone_Sort=
+o pali kama e nanpa
+
+Gramophone_Step=
+nanpa pi wan Pemoto
+
+Gramophone_Stop=
+o pake
+
+Gramophone_Which=
+sina wile seme?
