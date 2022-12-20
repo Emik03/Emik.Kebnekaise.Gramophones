@@ -71,7 +71,7 @@ static class Gramophone
         string param,
         float value
     ) =>
-        IsPlaying.NotThen(orig)?.Invoke(instance, param, value);
+        (s_allowParams || !IsPlaying).Then(orig)?.Invoke(instance, param, value);
 
     internal static void SetParam(string? param, string? value)
     {
