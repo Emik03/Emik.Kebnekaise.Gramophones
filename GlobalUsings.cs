@@ -7,6 +7,7 @@ global using FMOD.Studio;
 global using Ionic.Zip;
 global using Monocle;
 global using MonoMod.Utils;
+global using static Celeste.Mod.Everest.Loader;
 global using static Celeste.TextMenu;
 global using Audio = Celeste.Audio;
 global using AudioState = On.Celeste.AudioState;

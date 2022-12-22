@@ -1,6 +1,11 @@
-﻿// <copyright file="Gramophone.cs" company="Emik">
+﻿#region Emik.MPL
+
+// <copyright file="Gramophone.cs" company="Emik">
 // Copyright (c) Emik. This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // </copyright>
+
+#endregion
+
 #pragma warning disable SA1600
 namespace Emik.Kebnekaise.Gramophones;
 
@@ -62,7 +67,7 @@ static class Gramophone
         return false;
     }
 
-    internal static void SetMusicParam(On.Celeste.Audio.orig_SetMusicParam? orig, string? path, float value) =>
+    internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value) =>
         (s_allowParams || !IsPlaying).Then(orig)?.Invoke(path, value);
 
     internal static void SetParameter(
@@ -182,7 +187,7 @@ static class Gramophone
     }
 
     static string Friendly(int i) =>
-        i.Index()?.Replace("music:/", "") is { } wide
+        i.Index()?.Replace("music:/", "").Replace("event:/", "") is { } wide
             ? (wide.Reverse().Take(MaxLength) is var thin &&
                 wide.Length > MaxLength
                     ? thin.Concat(new[] { '\u2026' })

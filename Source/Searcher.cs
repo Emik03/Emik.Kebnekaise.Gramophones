@@ -1,12 +1,17 @@
+#region Emik.MPL
+
 // <copyright file="Searcher.cs" company="Emik">
 // Copyright (c) Emik. This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // </copyright>
+
+#endregion
+
 #pragma warning disable SA1600
 namespace Emik.Kebnekaise.Gramophones;
 
 static class Searcher
 {
-    static readonly string[] s_banned = { "char", "env", "game", "sound", "sfx", "ui" };
+    static readonly string[] s_banned = { "char", "env", "game", "menu", "sound", "sfx", "ui" };
 
     static IList<string?>? s_songs;
 
@@ -38,7 +43,7 @@ static class Searcher
         static IEnumerable<ZipFile> AllFiles(string? x) => Please.Try(ZipFile.Read, x);
 
         return Please
-           .Try(Directory.GetFiles, Everest.Loader.PathMods, "*.zip")
+           .Try(Directory.GetFiles, PathMods, "*.zip")
            .SelectMany(Enumerable.AsEnumerable)
            .Select(AllFiles)
            .SelectMany(Enumerable.AsEnumerable)

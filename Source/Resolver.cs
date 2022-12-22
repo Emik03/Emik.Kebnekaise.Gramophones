@@ -1,9 +1,12 @@
+#region Emik.MPL
+
 // <copyright file="Resolver.cs" company="Emik">
 // Copyright (c) Emik. This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // </copyright>
-namespace Emik.Kebnekaise.Gramophones;
 
-using static Everest.Loader;
+#endregion
+
+namespace Emik.Kebnekaise.Gramophones;
 
 /// <summary>Resolves dependencies used by this library.</summary>
 static class Resolver
