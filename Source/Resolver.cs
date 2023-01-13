@@ -11,15 +11,15 @@ namespace Emik.Kebnekaise.Gramophones;
 /// <summary>Resolves dependencies used by this library.</summary>
 static class Resolver
 {
-    static string Loader => $"{Please.Try(LoadDependencies)}";
-
     /// <summary>Loads missing dependencies.</summary>
+#pragma warning disable CA2255
     [ModuleInitializer]
-    internal static void Init() => Logger.Log(nameof(Gramophone), Loader);
-
-    static void LoadDependencies() =>
+#pragma warning restore CA2255
+    internal static void Init() =>
         Directory
            .GetFiles(PathMods, "Emik.Results.dll")
+           .Lazily(x => Logger.Log(nameof(Gramophone), $"Loading assembly: {x}"))
            .Select(Assembly.LoadFile)
+           .Lazily(x => Logger.Log(nameof(Gramophone), $"Loaded library: {x}"))
            .Enumerate();
 }
