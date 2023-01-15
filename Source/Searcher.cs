@@ -20,7 +20,9 @@ static class Searcher
     internal static IList<string?> Song => s_songs ??= Songs().ToGuardedLazily();
 
     internal static void Rearrange() => // ReSharper disable once AssignmentInConditionalExpression
-        s_songs = ((IsSorted = !IsSorted) ? s_songs?.OrderBy(Self) : s_songs?.Shuffle() as IEnumerable<string?>)
+        s_songs = ((IsSorted = !IsSorted)
+                ? s_songs?.OrderBy(Self, StringComparer.OrdinalIgnoreCase)
+                : s_songs?.Shuffle() as IEnumerable<string?>)
           ?.ToGuardedLazily();
 
     static IEnumerable<string?> Songs()
@@ -53,7 +55,7 @@ static class Searcher
            .Where(Desired)
            .Where(HasParams)
            .Distinct(StringComparer.OrdinalIgnoreCase)
-           .OrderBy(Self)
+           .OrderBy(Self, StringComparer.OrdinalIgnoreCase)
            .ToList()
            .For(Log);
     }

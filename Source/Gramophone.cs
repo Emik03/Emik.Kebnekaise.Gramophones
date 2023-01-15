@@ -104,7 +104,10 @@ static class Gramophone
         IsPlaying = false;
         Set(song, true);
         Current = song;
-        s_parameters = Audio.CurrentMusicEventInstance.Parameters().OrderBy(Name).ToList();
+
+        s_parameters = Audio.CurrentMusicEventInstance.Parameters()
+           .OrderBy(Name, StringComparer.OrdinalIgnoreCase)
+           .ToList();
     }
 
     internal static void Stop() => Set(Previous, false);
