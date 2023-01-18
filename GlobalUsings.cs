@@ -1,13 +1,4 @@
-#region Emik.MPL
-
-// <copyright file="GlobalUsings.cs" company="Emik">
-// Copyright (c) Emik. This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// </copyright>
-
-#endregion
-
-#region
-
+// SPDX-License-Identifier: MPL-2.0
 global using Celeste.Mod;
 global using FMOD;
 global using FMOD.Studio;
@@ -24,5 +15,3 @@ global using Level = Celeste.Level;
 global using OnAudio = On.Celeste.Audio;
 global using TextMenu = Celeste.TextMenu;
 global using ZipFile = Ionic.Zip.ZipFile;
-
-#endregion
