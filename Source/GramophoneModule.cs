@@ -29,8 +29,6 @@ public sealed class GramophoneModule : EverestModule
     {
         base.CreateModMenuSection(menu, inGame, snapshot);
 
-        _ = Searcher.Song;
-
         new Item[]
         {
             new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
@@ -47,6 +45,8 @@ public sealed class GramophoneModule : EverestModule
         OnAudio.SetMusic += Gramophone.SetMusic;
         OnAudio.SetMusicParam += Gramophone.SetMusicParam;
         OnAudio.SetParameter += Gramophone.SetParameter;
+
+        _ = Searcher.Song;
     }
 
     public override void Unload()
