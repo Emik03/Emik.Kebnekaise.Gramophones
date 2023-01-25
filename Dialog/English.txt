@@ -14,22 +14,22 @@ Gramophone_None=
 None
 
 Gramophone_Params=
-Allow map to change song parameter values
+Inhibit parameters
 
 Gramophone_Shuffle=
-Sort the songs randomly
+Sort randomly
 
 Gramophone_Song=
 Song
 
 Gramophone_Sort=
-Sort the songs alphabetically
+Sort alphabetically
 
 Gramophone_Step=
-Number of steps per FMOD unit
+Steps per FMOD unit
 
 Gramophone_Stop=
 Stop
 
 Gramophone_Which=
-Which song do you want to play?
+Which song?
