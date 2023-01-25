@@ -6,7 +6,7 @@ static class Gramophone
 {
     const int MaxLength = 31;
 
-    static bool s_inhibit;
+    static bool s_inhibit, s_isAudioReady;
 
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
     static IList<Item>? s_items;
@@ -34,17 +34,15 @@ static class Gramophone
     internal static void Inhibit() => s_inhibit = !s_inhibit;
 
 #pragma warning disable IDE0060, RCS1163
-    internal static void LoadFromDisk(Session session, bool fromsavedata)
-    {
-        IsPlaying = true;
-
-        // Race condition; Grab a reference to current music because a side-effect involves loading the song.
-        var last = Audio.CurrentMusic;
-        _ = Searcher.Song;
-        Previous = last;
-        Play(Previous);
-    }
+    internal static void IndicateAudioIsReady(Session session, bool fromsavedata) => s_isAudioReady = true;
 #pragma warning restore IDE0060, RCS1163
+
+    internal static void MuteAmbience()
+    {
+        Audio.SetAmbience("");
+        AudioSession.Ambience.Event = "";
+        AudioSession.Apply();
+    }
 
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
@@ -74,19 +72,11 @@ static class Gramophone
         Set(song, true);
         Current = song;
 
-        s_parameters = Audio.CurrentMusicEventInstance.Parameters()
+        s_parameters = Audio
+           .CurrentMusicEventInstance
+           .Parameters()
            .OrderBy(Name, StringComparer.OrdinalIgnoreCase)
            .ToList();
-    }
-
-    internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
-    {
-        if (!IsPlaying)
-            return orig?.Invoke(path, startPlaying, allowFadeOut) ?? false;
-
-        Previous = path;
-
-        return false;
     }
 
     internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value) =>
@@ -119,6 +109,19 @@ static class Gramophone
     }
 
     internal static void Stop() => Set(Previous, false);
+
+    internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
+    {
+        if (s_isAudioReady)
+            _ = Searcher.Song;
+
+        if (!IsPlaying)
+            return orig?.Invoke(path, startPlaying, allowFadeOut) ?? false;
+
+        Previous = path;
+
+        return false;
+    }
 
     static void AddItems(this TextMenu menu, Item song, Action onChange)
     {
@@ -156,13 +159,6 @@ static class Gramophone
         };
 
         s_items.Select(menu.Add).Enumerate();
-    }
-
-    static void MuteAmbience()
-    {
-        Audio.SetAmbience("");
-        AudioSession.Ambience.Event = "";
-        AudioSession.Apply();
     }
 
     static void Set(string? path, bool isPlaying)

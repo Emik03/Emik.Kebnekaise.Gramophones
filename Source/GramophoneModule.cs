@@ -13,6 +13,9 @@ public sealed class GramophoneModule : EverestModule
 
     public override Type SettingsType => typeof(GramophoneSettings);
 
+    [Command("gramophone_ambience", "[Gramophone] Mutes the ambience")]
+    public static void Ambience() => Gramophone.MuteAmbience();
+
     [Command("gramophone_play", "[Gramophone] Play a song")]
     public static void Play(string? song) => Gramophone.Play(song);
 
@@ -29,8 +32,10 @@ public sealed class GramophoneModule : EverestModule
     {
         base.CreateModMenuSection(menu, inGame, snapshot);
 
-        new Item[]
+        new[]
         {
+            new Button(Localized.Stop).Pressed(Stop),
+            new Button(Localized.Ambience).Pressed(Gramophone.MuteAmbience),
             new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
             new OnOff(Localized.Menu, Settings.Menu).Change(x => Settings.Menu = x),
         }.For(x => menu?.Add(x));
@@ -42,7 +47,7 @@ public sealed class GramophoneModule : EverestModule
 
         AudioState.Apply += Gramophone.Apply;
         Everest.Events.Level.OnCreatePauseMenuButtons += Gramophone.Pause;
-        Everest.Events.Level.OnEnter += Gramophone.LoadFromDisk;
+        Everest.Events.Level.OnEnter += Gramophone.IndicateAudioIsReady;
         OnAudio.SetMusic += Gramophone.SetMusic;
         OnAudio.SetMusicParam += Gramophone.SetMusicParam;
         OnAudio.SetParameter += Gramophone.SetParameter;

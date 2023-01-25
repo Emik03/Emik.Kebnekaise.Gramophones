@@ -8,6 +8,8 @@ static class Searcher
 
     static readonly IList<string?> s_loading = new[] { "..." };
 
+    static string? s_previous;
+
     static IList<string?>? s_songs;
 
     internal static bool IsSorted { get; private set; } = true;
@@ -20,20 +22,25 @@ static class Searcher
                 : s_songs?.Shuffle() as IEnumerable<string?>)
           ?.ToGuardedLazily();
 
-    static IList<string?> BeginSongs()
+    static void Finish(List<string> list)
     {
-        s_songs = s_loading;
-        new Thread(() => s_songs = Songs().ToGuardedLazily()).Start();
-        return s_songs;
+        list.For(x => Logger.Log(nameof(Gramophone), x));
+        Gramophone.Previous = s_previous;
+        Gramophone.Stop();
     }
+
+    static string? Self(string? x) => x;
 
     static IEnumerable<string?> Songs()
     {
-        static void Log(string? str) => Logger.Log(nameof(Gramophone), str);
-
         static bool Desired(string x) => x.StartsWith("event:/") && !s_banned.Any(x.Contains);
 
-        static bool HasParams(string x) => Please.Try(() => Audio.CreateInstance(x)).Ok.Parameters().Any();
+        static bool HasParams(string x)
+        {
+            s_previous ??= Audio.CurrentMusic;
+            var count = 0;
+            return Please.Try(Audio.GetEventDescription, x).Ok?.getParameterCount(out count) is var _ && count is not 0;
+        }
 
         static bool HasSongGuids(ZipEntry x) => x.FileName.EndsWith(".guids.txt");
 
@@ -59,8 +66,13 @@ static class Searcher
            .Distinct(StringComparer.OrdinalIgnoreCase)
            .OrderBy(Self, StringComparer.OrdinalIgnoreCase)
            .ToList()
-           .For(Log);
+           .Peek(Finish);
     }
 
-    static string? Self(string? x) => x;
+    static IList<string?> BeginSongs()
+    {
+        s_songs = s_loading;
+        new Thread(() => s_songs = Songs().ToGuardedLazily()).Start();
+        return s_songs;
+    }
 }
