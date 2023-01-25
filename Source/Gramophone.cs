@@ -34,7 +34,16 @@ static class Gramophone
     internal static void Inhibit() => s_inhibit = !s_inhibit;
 
 #pragma warning disable IDE0060, RCS1163
-    internal static void LoadFromDisk(Session session, bool fromsavedata) => _ = Searcher.Song;
+    internal static void LoadFromDisk(Session session, bool fromsavedata)
+    {
+        IsPlaying = true;
+
+        // Race condition; Grab a reference to current music because a side-effect involves loading the song.
+        var last = Audio.CurrentMusic;
+        _ = Searcher.Song;
+        Previous = last;
+        Play(Previous);
+    }
 #pragma warning restore IDE0060, RCS1163
 
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
