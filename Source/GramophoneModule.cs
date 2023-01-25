@@ -42,11 +42,10 @@ public sealed class GramophoneModule : EverestModule
 
         AudioState.Apply += Gramophone.Apply;
         Everest.Events.Level.OnCreatePauseMenuButtons += Gramophone.Pause;
+        Everest.Events.Level.OnEnter += Gramophone.LoadFromDisk;
         OnAudio.SetMusic += Gramophone.SetMusic;
         OnAudio.SetMusicParam += Gramophone.SetMusicParam;
         OnAudio.SetParameter += Gramophone.SetParameter;
-
-        _ = Searcher.Song;
     }
 
     public override void Unload()

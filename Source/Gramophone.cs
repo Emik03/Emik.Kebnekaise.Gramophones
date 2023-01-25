@@ -33,6 +33,10 @@ static class Gramophone
 
     internal static void Inhibit() => s_inhibit = !s_inhibit;
 
+#pragma warning disable IDE0060, RCS1163
+    internal static void LoadFromDisk(Session session, bool fromsavedata) => _ = Searcher.Song;
+#pragma warning restore IDE0060, RCS1163
+
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
         Item? item = null;
