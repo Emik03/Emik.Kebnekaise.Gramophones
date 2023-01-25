@@ -6,7 +6,7 @@ static class Searcher
 {
     static readonly string[] s_banned = { "char", "env", "game", "menu", "sound", "sfx", "ui" };
 
-    static readonly IList<string?> s_loading = new[] { "Loading..." };
+    static readonly IList<string?> s_loading = new[] { "..." };
 
     static IList<string?>? s_songs;
 

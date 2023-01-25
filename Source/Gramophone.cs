@@ -6,7 +6,7 @@ static class Gramophone
 {
     const int MaxLength = 31;
 
-    static bool s_allowParams;
+    static bool s_inhibit;
 
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
     static IList<Item>? s_items;
@@ -31,6 +31,8 @@ static class Gramophone
             orig?.Invoke(self);
     }
 
+    internal static void Inhibit() => s_inhibit = !s_inhibit;
+
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
         Item? item = null;
@@ -50,6 +52,20 @@ static class Gramophone
         _ = GramophoneModule.Settings.Menu.Then(() => menu?.Add(new Button(Localized.Gramo).Pressed(Press)));
     }
 
+    internal static void Play(string? song)
+    {
+        _ = IsPlaying.NotThen(() => Previous = Audio.CurrentMusic);
+
+        // Temporarily assign to false to allow the song to be played.
+        IsPlaying = false;
+        Set(song, true);
+        Current = song;
+
+        s_parameters = Audio.CurrentMusicEventInstance.Parameters()
+           .OrderBy(Name, StringComparer.OrdinalIgnoreCase)
+           .ToList();
+    }
+
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
         if (!IsPlaying)
@@ -61,7 +77,7 @@ static class Gramophone
     }
 
     internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value) =>
-        (s_allowParams || !IsPlaying).Then(orig)?.Invoke(path, value);
+        (s_inhibit || !IsPlaying).Then(orig)?.Invoke(path, value);
 
     internal static void SetParameter(
         OnAudio.orig_SetParameter orig,
@@ -69,7 +85,7 @@ static class Gramophone
         string param,
         float value
     ) =>
-        (s_allowParams || !IsPlaying).Then(orig)?.Invoke(instance, param, value);
+        (s_inhibit || !IsPlaying).Then(orig)?.Invoke(instance, param, value);
 
     internal static void SetParam(string? param, string? value)
     {
@@ -89,33 +105,20 @@ static class Gramophone
            .For(x => x.setValue(v));
     }
 
-    internal static void Play(string? song)
-    {
-        _ = IsPlaying.NotThen(() => Previous = Audio.CurrentMusic);
-
-        // Temporarily assign to false to allow the song to be played.
-        IsPlaying = false;
-        Set(song, true);
-        Current = song;
-
-        s_parameters = Audio.CurrentMusicEventInstance.Parameters()
-           .OrderBy(Name, StringComparer.OrdinalIgnoreCase)
-           .ToList();
-    }
-
     internal static void Stop() => Set(Previous, false);
 
     static void AddItems(this TextMenu menu, Item song, Action onChange)
     {
         var shuffle = new Button(Label);
 
-        var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step).Change(
-            x =>
-            {
-                GramophoneModule.Settings.Step = x;
-                onChange();
-            }
-        );
+        var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step)
+           .Change(
+                x =>
+                {
+                    GramophoneModule.Settings.Step = x;
+                    onChange();
+                }
+            );
 
         _ = shuffle.Pressed(
             () =>
@@ -134,7 +137,7 @@ static class Gramophone
             new Button(Localized.Stop).Pressed(Stop),
             new Button(Localized.Ambience).Pressed(MuteAmbience),
             shuffle,
-            new OnOff(Localized.Params, s_allowParams).Change(x => s_allowParams = x),
+            new OnOff(Localized.Params, s_inhibit).Change(x => s_inhibit = x),
             step,
             song,
         };
@@ -182,6 +185,9 @@ static class Gramophone
         level?.Add(menu);
     }
 
+    // TODO: Look into whether this is the correct hook.
+    // static void A(OuiNumberEntry.orig_OnKeyboardInput orig, OuiNumberEntry self, char c) { }
+
     static string Friendly(int i) =>
         i.Index()?.Replace("music:/", "").Replace("event:/", "") is { } wide
             ? (wide.Reverse().Take(MaxLength) is var thin &&
@@ -217,6 +223,8 @@ static class Gramophone
 
         void Leave() => Audio.ResumeSnapshot(pause);
 
+        Item ToSongButton(int x) => new Button(Friendly(x)).Pressed(() => Change(x)).Enter(Enter).Leave(Leave);
+
         Item Item(ParameterInstance p)
         {
             const int MaxValue = 1000;
@@ -225,7 +233,13 @@ static class Gramophone
 
             var step = (float)GramophoneModule.Settings.Step;
 
-            return new Slider(p.Name(), i => Math.Round(i / step, 2).Stringify(), 0, MaxValue, (int)(cur * step))
+            return new Slider(
+                    p.Name(),
+                    i => Math.Round(i / step, 2).Stringify(),
+                    0,
+                    MaxValue,
+                    (int)(cur * step)
+                )
                .Change(i => p.setValue(i / step))
                .Enter(Enter)
                .Leave(Leave);
@@ -237,11 +251,24 @@ static class Gramophone
         var song = new Slider(Localized.Song, Friendly, 0, upper, index);
         _ = song.Change(Change).Enter(Enter).Leave(Leave);
 
+        // TODO: Use keyboard as search filter
+        // var song = new TextMenuExt.SubMenu(Localized.Song, true);
+        //
+        // _ = song.Leave(() => OuiNumberEntry.OnKeyboardInput += A)
+        //
+        // var songs = Searcher.Song.Count.For(ToSongButton)
+        //    .For(x => x.Visible = false)
+        //    .For(x => song.Add(x))
+        //    .For(x => song.Leave(() => x.Visible = false).Enter(() => x.Visible = true));
+
         menu.AddItems(
             song,
             () =>
             {
-                song.OnValueChange(Searcher.Song.IndexOf(Current));
+                var song = new Slider(Localized.Song, Friendly, 0, upper, index);
+
+                // TODO: Uncomment this only when search is implemented.
+                // Change(Searcher.Song.IndexOf(Current));
                 song.Update();
             }
         );
