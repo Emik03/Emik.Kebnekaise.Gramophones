@@ -208,6 +208,14 @@ static class Gramophone
         return description.name;
     }
 
+    static Slider MakeSlider()
+    {
+        int index = Searcher.Song.IndexOf(Current),
+            upper = Searcher.Song.Count - 1;
+
+        return new(Localized.Song, Friendly, 0, upper, index);
+    }
+
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
     {
         void Change(int x)
@@ -237,22 +245,13 @@ static class Gramophone
 
             var step = (float)GramophoneModule.Settings.Step;
 
-            return new Slider(
-                    p.Name(),
-                    i => Math.Round(i / step, 2).Stringify(),
-                    0,
-                    MaxValue,
-                    (int)(cur * step)
-                )
+            return new Slider(p.Name(), i => Math.Round(i / step, 2).Stringify(), 0, MaxValue, (int)(cur * step))
                .Change(i => p.setValue(i / step))
                .Enter(Enter)
                .Leave(Leave);
         }
 
-        int index = Searcher.Song.IndexOf(Current),
-            upper = Searcher.Song.Count - 1;
-
-        var song = new Slider(Localized.Song, Friendly, 0, upper, index);
+        var song = MakeSlider();
         _ = song.Change(Change).Enter(Enter).Leave(Leave);
 
         // TODO: Use keyboard as search filter
@@ -269,11 +268,12 @@ static class Gramophone
             song,
             () =>
             {
-                var song = new Slider(Localized.Song, Friendly, 0, upper, index);
+                song.OnValueChange(Searcher.Song.IndexOf(Current));
 
                 // TODO: Uncomment this only when search is implemented.
                 // Change(Searcher.Song.IndexOf(Current));
-                song.Update();
+                song.Values.Clear();
+                Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
             }
         );
 

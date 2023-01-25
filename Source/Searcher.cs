@@ -22,8 +22,9 @@ static class Searcher
 
     static IList<string?> BeginSongs()
     {
+        s_songs = s_loading;
         new Thread(() => s_songs = Songs().ToGuardedLazily()).Start();
-        return s_loading;
+        return s_songs;
     }
 
     static IEnumerable<string?> Songs()
