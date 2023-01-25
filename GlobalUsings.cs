@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MPL-2.0
+global using Celeste;
 global using Celeste.Mod;
+global using Celeste.Mod.UI;
 global using FMOD;
 global using FMOD.Studio;
 global using Ionic.Zip;
 global using Monocle;
 global using MonoMod.Utils;
+global using On.Celeste.Mod.UI;
 global using static Celeste.Mod.Everest.Loader;
 global using static Celeste.TextMenu;
 global using Audio = Celeste.Audio;

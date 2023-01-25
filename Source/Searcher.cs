@@ -6,17 +6,25 @@ static class Searcher
 {
     static readonly string[] s_banned = { "char", "env", "game", "menu", "sound", "sfx", "ui" };
 
+    static readonly IList<string?> s_loading = new[] { "Loading..." };
+
     static IList<string?>? s_songs;
 
     internal static bool IsSorted { get; private set; } = true;
 
-    internal static IList<string?> Song => s_songs ??= Songs().ToGuardedLazily();
+    internal static IList<string?> Song => s_songs ?? BeginSongs();
 
     internal static void Rearrange() => // ReSharper disable once AssignmentInConditionalExpression
         s_songs = ((IsSorted = !IsSorted)
                 ? s_songs?.OrderBy(Self, StringComparer.OrdinalIgnoreCase)
                 : s_songs?.Shuffle() as IEnumerable<string?>)
           ?.ToGuardedLazily();
+
+    static IList<string?> BeginSongs()
+    {
+        new Thread(() => s_songs = Songs().ToGuardedLazily()).Start();
+        return s_loading;
+    }
 
     static IEnumerable<string?> Songs()
     {
