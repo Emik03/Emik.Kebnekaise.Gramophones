@@ -19,12 +19,17 @@ public sealed class GramophoneModule : EverestModule
     [Command("gramophone_change", "[Gramophone] Change a parameter in the song")]
     public static void Change(string? param, string? value) => Gramophone.SetParam(param, value);
 
+    [Command("gramophone_inhibit", "[Gramophone] Toggles if the map is allowed to change song parameter values")]
+    public static void Inhibit() => Gramophone.Inhibit();
+
     [Command("gramophone_stop", "[Gramophone] Stop a song")]
     public static void Stop() => Gramophone.Stop();
 
     public override void CreateModMenuSection(TextMenu? menu, bool inGame, EventInstance? snapshot)
     {
         base.CreateModMenuSection(menu, inGame, snapshot);
+
+        _ = Searcher.Song;
 
         new Item[]
         {
