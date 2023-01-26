@@ -1,6 +1,7 @@
 ﻿<!-- SPDX-License-Identifier: MPL-2.0 -->
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <FileVersion>1.0.1</FileVersion>
         <TargetFramework>net452</TargetFramework>
         <Description>Celeste/Everest Mod that allows you to play any FMOD bank, anywhere.</Description>
     </PropertyGroup>

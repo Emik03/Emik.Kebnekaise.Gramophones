@@ -34,8 +34,6 @@ public sealed class GramophoneModule : EverestModule
 
         new[]
         {
-            new Button(Localized.Stop).Pressed(Stop),
-            new Button(Localized.Ambience).Pressed(Gramophone.MuteAmbience),
             new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
             new OnOff(Localized.Menu, Settings.Menu).Change(x => Settings.Menu = x),
         }.For(x => menu?.Add(x));
