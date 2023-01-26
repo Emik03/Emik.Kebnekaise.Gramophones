@@ -194,9 +194,6 @@ static class Gramophone
         level?.Add(menu);
     }
 
-    // TODO: Look into whether this is the correct hook.
-    // static void A(OuiNumberEntry.orig_OnKeyboardInput orig, OuiNumberEntry self, char c) { }
-
     static string Friendly(int i) =>
         i.Index()?.Replace("music:/", "").Replace("event:/", "") is { } wide
             ? (wide.Reverse().Take(MaxLength) is var thin &&
@@ -240,8 +237,6 @@ static class Gramophone
 
         void Leave() => Audio.ResumeSnapshot(pause);
 
-        Item ToSongButton(int x) => new Button(Friendly(x)).Pressed(() => Change(x)).Enter(Enter).Leave(Leave);
-
         Item Item(ParameterInstance p)
         {
             const int MaxValue = 1000;
@@ -259,24 +254,12 @@ static class Gramophone
         var song = MakeSlider();
         _ = song.Change(Change).Enter(Enter).Leave(Leave);
 
-        // TODO: Use keyboard as search filter
-        // var song = new TextMenuExt.SubMenu(Localized.Song, true);
-        //
-        // _ = song.Leave(() => OuiNumberEntry.OnKeyboardInput += A)
-        //
-        // var songs = Searcher.Song.Count.For(ToSongButton)
-        //    .For(x => x.Visible = false)
-        //    .For(x => song.Add(x))
-        //    .For(x => song.Leave(() => x.Visible = false).Enter(() => x.Visible = true));
-
         menu.AddItems(
             song,
             () =>
             {
                 song.OnValueChange(Searcher.Song.IndexOf(Current));
 
-                // TODO: Uncomment this only when search is implemented.
-                // Change(Searcher.Song.IndexOf(Current));
                 song.Values.Clear();
                 Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
             }
