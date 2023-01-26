@@ -57,6 +57,7 @@ public sealed class GramophoneModule : EverestModule
 
         AudioState.Apply -= Gramophone.Apply;
         Everest.Events.Level.OnCreatePauseMenuButtons -= Gramophone.Pause;
+        Everest.Events.Level.OnEnter -= Gramophone.IndicateAudioIsReady;
         OnAudio.SetMusic -= Gramophone.SetMusic;
         OnAudio.SetMusicParam -= Gramophone.SetMusicParam;
         OnAudio.SetParameter -= Gramophone.SetParameter;
