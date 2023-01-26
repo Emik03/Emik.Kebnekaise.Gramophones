@@ -4,6 +4,9 @@ o weka e kalama kon
 Gramophone_Enable=
 o kepeken
 
+Gramophone_Enter=
+sina wile lukin kama la o pilin e nena 'Enter'!
+
 Gramophone_Gramo=
 ilo pi kalama musi
 

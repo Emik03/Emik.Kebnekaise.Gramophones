@@ -6,7 +6,9 @@ static class Gramophone
 {
     const int MaxLength = 31;
 
-    static bool s_inhibit, s_isAudioReady;
+    static readonly StringBuilder s_sb = new();
+
+    static bool s_inhibit, s_isAudioReady, s_isSearching;
 
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
     static IList<Item>? s_items;
@@ -194,9 +196,6 @@ static class Gramophone
         level?.Add(menu);
     }
 
-    // TODO: Look into whether this is the correct hook.
-    // static void A(OuiNumberEntry.orig_OnKeyboardInput orig, OuiNumberEntry self, char c) { }
-
     static string Friendly(int i) =>
         i.Index()?.Replace("music:/", "").Replace("event:/", "") is { } wide
             ? (wide.Reverse().Take(MaxLength) is var thin &&
@@ -211,14 +210,6 @@ static class Gramophone
     {
         parameter.getDescription(out var description);
         return description.name;
-    }
-
-    static Slider MakeSlider()
-    {
-        int index = Searcher.Song.IndexOf(Current),
-            upper = Searcher.Song.Count - 1;
-
-        return new(Localized.Song, Friendly, 0, upper, index);
     }
 
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
@@ -256,29 +247,31 @@ static class Gramophone
                .Leave(Leave);
         }
 
-        var song = MakeSlider();
-        _ = song.Change(Change).Enter(Enter).Leave(Leave);
+        SubHeader songSearchDescription = new(Localized.Enter);
+        var songSearch = new TextMenuExt.SubMenu(Localized.Song, true).Add(songSearchDescription);
 
-        // TODO: Use keyboard as search filter
-        // var song = new TextMenuExt.SubMenu(Localized.Song, true);
-        //
-        // _ = song.Leave(() => OuiNumberEntry.OnKeyboardInput += A)
-        //
-        // var songs = Searcher.Song.Count.For(ToSongButton)
-        //    .For(x => x.Visible = false)
-        //    .For(x => song.Add(x))
-        //    .For(x => song.Leave(() => x.Visible = false).Enter(() => x.Visible = true));
+        songSearch
+           .Enter(Enter)
+           .Leave(Leave)
+           .Enter(() => songSearchDescription.Visible = true)
+           .Leave(() => songSearchDescription.Visible = false)
+           .Enter(() => TextInput.OnInput += songSearch.Process)
+           .Leave(() => TextInput.OnInput -= songSearch.Process);
+
+        Searcher.Song.Count
+           .For(ToSongButton)
+           .For(x => x.Visible = false)
+           .For(x => songSearch.Add(x))
+           .For(x => songSearch.Leave(() => x.Visible = false).Enter(() => x.Visible = true));
 
         menu.AddItems(
-            song,
+            songSearch,
             () =>
             {
-                song.OnValueChange(Searcher.Song.IndexOf(Current));
-
-                // TODO: Uncomment this only when search is implemented.
+                // song.OnValueChange(Searcher.Song.IndexOf(Current));
                 // Change(Searcher.Song.IndexOf(Current));
-                song.Values.Clear();
-                Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
+                // song.Values.Clear();
+                // Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
             }
         );
 
@@ -286,4 +279,44 @@ static class Gramophone
 
         return menu;
     }
+
+    static void Process(this TextMenuExt.SubMenu songSearch, char c)
+    {
+        if (!TryInsert(c))
+            return;
+
+        var current = s_sb.ToString();
+        var buttons = songSearch.Items.OfType<Button>().ToCollectionLazily();
+        var comparer = Comparing<Button, double>(x => x.Label.Jaro(current));
+        var mostSimilar = buttons.OrderByDescending(x => x, comparer).Take(5).ToCollectionLazily();
+
+        songSearch.Items.OfType<SubHeader>().For(x => x.Title = s_isSearching ? current : Localized.Enter);
+        buttons.For(s => s.Visible = mostSimilar.Contains(s));
+    }
+
+    static bool TryInsert(char c)
+    {
+        const char
+            Enter = '\n',
+            Return = '\r',
+            Backspace = '\b';
+
+        switch (c)
+        {
+            case Enter or Return:
+                s_isSearching = !s_isSearching;
+                break;
+            case Backspace:
+                s_sb.RemoveLast();
+                break;
+            case var _ when !c.IsControl():
+                s_sb.Append(c);
+                break;
+        }
+
+        return s_isSearching;
+    }
+
+    // ReSharper disable once UnusedMethodReturnValue.Local
+    static StringBuilder RemoveLast(this StringBuilder sb) => sb.Length is 0 ? sb : sb.Remove(sb.Length - 1, 1);
 }
