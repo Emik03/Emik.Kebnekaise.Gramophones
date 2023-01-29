@@ -10,6 +10,8 @@ static class Localized
 
     internal static LocalString Gramo { get; } = new(nameof(Gramo));
 
+    internal static LocalString Loading { get; } = new(nameof(Loading));
+
     internal static LocalString Menu { get; } = new(nameof(Menu));
 
     internal static LocalString None { get; } = new(nameof(None));
