@@ -6,7 +6,7 @@ static class Gramophone
 {
     const int MaxLength = 31;
 
-    static bool s_inhibit, s_isAudioReady;
+    static bool s_inhibit;
 
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
     static IList<Item>? s_items;
@@ -21,7 +21,7 @@ static class Gramophone
 
     internal static string? Current { get; set; }
 
-    static Celeste.AudioState AudioSession => ((Level)Engine.Scene).Session.Audio;
+    static Celeste.AudioState? AudioSession => (Engine.Scene as Level)?.Session.Audio;
 
     static Localized.LocalString Label => Searcher.IsSorted ? Localized.Shuffle : Localized.Sort;
 
@@ -33,16 +33,7 @@ static class Gramophone
 
     internal static void Inhibit() => s_inhibit = !s_inhibit;
 
-#pragma warning disable IDE0060, RCS1163
-    internal static void IndicateAudioIsReady(Session session, bool fromsavedata) => s_isAudioReady = true;
-#pragma warning restore IDE0060, RCS1163
-
-    internal static void MuteAmbience()
-    {
-        Audio.SetAmbience("");
-        AudioSession.Ambience.Event = "";
-        AudioSession.Apply();
-    }
+    internal static void MuteAmbience() => Audio.CurrentAmbienceEventInstance?.stop(STOP_MODE.ALLOWFADEOUT);
 
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
@@ -112,9 +103,6 @@ static class Gramophone
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
-        if (s_isAudioReady)
-            _ = Searcher.Song;
-
         if (!IsPlaying)
             return orig?.Invoke(path, startPlaying, allowFadeOut) ?? false;
 
@@ -163,10 +151,13 @@ static class Gramophone
 
     static void Set(string? path, bool isPlaying)
     {
+        if (AudioSession is not { } audio)
+            return;
+
         Audio.SetMusic(path);
         IsPlaying = isPlaying;
-        AudioSession.Music.Event = path;
-        AudioSession.Apply();
+        audio.Music.Event = path;
+        audio.Apply();
     }
 
     static void Screen(this Level? level, int returnIndex, bool minimal)
