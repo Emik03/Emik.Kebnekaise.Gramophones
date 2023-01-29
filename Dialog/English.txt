@@ -7,6 +7,9 @@ Enabled
 Gramophone_Gramo=
 Gramophone
 
+Gramophone_Loading=
+Loading...
+
 Gramophone_Menu=
 Show in Menu
 

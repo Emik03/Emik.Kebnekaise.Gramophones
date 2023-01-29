@@ -7,6 +7,9 @@ o kepeken
 Gramophone_Gramo=
 ilo pi kalama musi
 
+Gramophone_Loading=
+o awen...
+
 Gramophone_Menu=
 o ken lukin
 
