@@ -126,6 +126,7 @@ static class Gramophone
             {
                 Searcher.Rearrange();
                 shuffle.Label = Label;
+                shuffle.Update();
                 onChange();
             }
         );
@@ -182,6 +183,20 @@ static class Gramophone
         level?.Add(menu);
     }
 
+    static void UpdateDisplay(Slider? song, SubHeader? description)
+    {
+        if (song is null || description is null)
+            return;
+
+        song.OnValueChange(Searcher.IsSearching ? 0 : Searcher.Song.IndexOf(Current));
+        song.Values.Clear();
+        Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
+        description.Title = DescriptionTitle();
+    }
+
+    static string DescriptionTitle() =>
+        Searcher.IsSearching ? string.Format(Localized.Searching, Searcher.Query) : Localized.Enter;
+
     internal static string Friendly(int i) => MakeFriendly(Searcher.Song[i]);
 
     internal static string MakeFriendly(string? s) => s?.Split(":/").LastOrDefault()?.StringHell() ?? Localized.None;
@@ -216,32 +231,12 @@ static class Gramophone
         return new(Localized.Song, Friendly, 0, upper, index);
     }
 
-#pragma warning disable MA0051
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
-#pragma warning restore MA0051
     {
         var song = MakeSlider();
-
         var description = new SubHeader(Localized.Enter, false);
 
-        void UpdateDisplay()
-        {
-            // The C# compiler is really dumb and thinks it can be null anyway.
-            // ReSharper disable ConditionIsAlwaysTrueOrFalse
-            if (song is null || description is null)
-                return;
-
-            song.Values.Clear();
-            Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
-
-            description.Title = Searcher.IsSearching
-                ? string.Format(Localized.Searching, Searcher.Query)
-                : Localized.Enter;
-
-            song.OnValueChange(Searcher.IsSearching ? 0 : Searcher.Song.IndexOf(Current));
-        }
-
-        void Input(char c) => Searcher.Process(c, UpdateDisplay);
+        void Input(char c) => Searcher.Process(c, song, description, UpdateDisplay);
 
         void Change(int x)
         {
@@ -258,19 +253,21 @@ static class Gramophone
 
         void Enter() => Audio.EndSnapshot(pause);
 
-        void Leave() => Audio.ResumeSnapshot(pause);
-
         void EnterSong()
         {
             Enter();
             TextInput.OnInput += Input;
         }
 
+        void Leave() => Audio.ResumeSnapshot(pause);
+
         void LeaveSong()
         {
             Leave();
             TextInput.OnInput -= Input;
         }
+
+        void Update() => UpdateDisplay(song, description);
 
         Item Item(ParameterInstance p)
         {
@@ -286,9 +283,7 @@ static class Gramophone
                .Leave(Leave);
         }
 
-        menu.AddItems(song.Change(Change).Enter(EnterSong).Leave(LeaveSong), description, UpdateDisplay);
-
-        Refresh();
+        menu.AddItems(song.Change(Change).Enter(EnterSong).Leave(LeaveSong), description, Update);
 
         return menu;
     }

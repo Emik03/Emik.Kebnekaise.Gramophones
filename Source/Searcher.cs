@@ -20,10 +20,13 @@ static class Searcher
 
     internal static StringBuilder Query { get; } = new();
 
-    internal static void Process(char c, Action reload)
+    internal static void Process(char c, Slider song, SubHeader description, Action<Slider, SubHeader> reload)
     {
         if (!TryInsert(c))
+        {
+            IsSearching.NotThen(reload)?.Invoke(song, description);
             return;
+        }
 
         var current = Query.ToString();
 
@@ -33,7 +36,7 @@ static class Searcher
            .ThenBy(Self, StringComparer.OrdinalIgnoreCase)
            .ToGuardedLazily();
 
-        reload();
+        reload(song, description);
     }
 
     internal static void Rearrange() => // ReSharper disable once AssignmentInConditionalExpression
