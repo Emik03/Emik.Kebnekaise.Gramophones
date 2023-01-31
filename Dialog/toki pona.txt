@@ -4,6 +4,9 @@ o weka e kalama kon
 Gramophone_Enable=
 o kepeken
 
+Gramophone_Enter=
+sina wile lukin kama la o pilin e nena 'Enter'!
+
 Gramophone_Gramo=
 ilo pi kalama musi
 
@@ -18,6 +21,9 @@ ala
 
 Gramophone_Params=
 musi ken ante e nanpa
+
+Gramophone_Searching=
+o lukin e ni: {0}
 
 Gramophone_Shuffle=
 o pali nasa e nanpa

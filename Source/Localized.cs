@@ -8,6 +8,8 @@ static class Localized
 
     internal static LocalString Enable { get; } = new(nameof(Enable));
 
+    internal static LocalString Enter { get; } = new(nameof(Enter));
+
     internal static LocalString Gramo { get; } = new(nameof(Gramo));
 
     internal static LocalString Loading { get; } = new(nameof(Loading));
@@ -17,6 +19,8 @@ static class Localized
     internal static LocalString None { get; } = new(nameof(None));
 
     internal static LocalString Params { get; } = new(nameof(Params));
+
+    internal static LocalString Searching { get; } = new(nameof(Searching));
 
     internal static LocalString Shuffle { get; } = new(nameof(Shuffle));
 

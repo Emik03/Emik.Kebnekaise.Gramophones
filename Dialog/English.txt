@@ -4,6 +4,9 @@ Mute Ambience
 Gramophone_Enable=
 Enabled
 
+Gramophone_Enter=
+Press 'Enter' to enable search mode!
+
 Gramophone_Gramo=
 Gramophone
 
@@ -18,6 +21,9 @@ None
 
 Gramophone_Params=
 Inhibit parameters
+
+Gramophone_Searching=
+Searching: {0}
 
 Gramophone_Shuffle=
 Sort randomly

@@ -4,7 +4,7 @@ namespace Emik.Kebnekaise.Gramophones;
 
 static class Extensions
 {
-    internal static void Apply(this IEnumerable<ParameterInstance> parameters, EventInstance? instance) =>
+    public static void Apply(this IEnumerable<ParameterInstance> parameters, EventInstance? instance) =>
         parameters.For(
             (p, i) =>
             {
@@ -19,8 +19,6 @@ static class Extensions
         Audio.Play(Back);
         menu?.Close();
     }
-
-    internal static string? Index(this int index) => Searcher.Song[index];
 
     internal static IEnumerable<ParameterInstance> Parameters(this EventInstance? instance)
     {

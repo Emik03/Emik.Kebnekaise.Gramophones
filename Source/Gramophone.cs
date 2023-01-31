@@ -4,7 +4,7 @@ namespace Emik.Kebnekaise.Gramophones;
 
 static class Gramophone
 {
-    const int MaxLength = 31;
+    const int MaxLength = 30;
 
     static bool s_inhibit;
 
@@ -25,11 +25,8 @@ static class Gramophone
 
     static Localized.LocalString Label => Searcher.IsSorted ? Localized.Shuffle : Localized.Sort;
 
-    internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self)
-    {
-        if (!IsPlaying)
-            orig?.Invoke(self);
-    }
+    internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self) =>
+        IsPlaying.NotThen(orig)?.Invoke(self);
 
     internal static void Inhibit() => s_inhibit = !s_inhibit;
 
@@ -111,7 +108,7 @@ static class Gramophone
         return false;
     }
 
-    static void AddItems(this TextMenu menu, Item song, Action onChange)
+    static void AddItems(this TextMenu menu, Item song, Item description, Action onChange)
     {
         var shuffle = new Button(Label);
 
@@ -129,7 +126,6 @@ static class Gramophone
             {
                 Searcher.Rearrange();
                 shuffle.Label = Label;
-                shuffle.Update();
                 onChange();
             }
         );
@@ -144,6 +140,7 @@ static class Gramophone
             new OnOff(Localized.Params, s_inhibit).Change(x => s_inhibit = x),
             step,
             song,
+            description,
         };
 
         s_items.Select(menu.Add).Enumerate();
@@ -185,20 +182,30 @@ static class Gramophone
         level?.Add(menu);
     }
 
-    static string Friendly(int i) =>
-        i.Index()?.Replace("music:/", "").Replace("event:/", "") is { } wide
-            ? (wide.Reverse().Take(MaxLength) is var thin &&
-                wide.Length > MaxLength
-                    ? thin.Concat(new[] { '\u2026' })
-                    : thin)
-           .Reverse()
-           .Conjoin()
-            : Localized.None;
+    internal static string Friendly(int i) => MakeFriendly(Searcher.Song[i]);
+
+    internal static string MakeFriendly(string? s) => s?.Split(":/").LastOrDefault()?.StringHell() ?? Localized.None;
 
     static string Name(this ParameterInstance parameter)
     {
         parameter.getDescription(out var description);
         return description.name;
+    }
+
+    static string StringHell(this string wide)
+    {
+        var seenSlash = false;
+
+        return wide
+           .Replace('_', ' ')
+           .Replace('-', ' ')
+           .Reverse()
+           .SelectMany(x => x is '/' ? !seenSlash && (seenSlash = true) ? "\n" : " > " : $"{x}")
+           .Reverse()
+           .Conjoin()
+           .Split('\n')
+           .Select(x => x.Length <= MaxLength ? x : x.Reverse().Take(MaxLength).Append('\u2026').Reverse().Conjoin())
+           .Conjoin('\n');
     }
 
     static Slider MakeSlider()
@@ -209,8 +216,33 @@ static class Gramophone
         return new(Localized.Song, Friendly, 0, upper, index);
     }
 
+#pragma warning disable MA0051
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
+#pragma warning restore MA0051
     {
+        var song = MakeSlider();
+
+        var description = new SubHeader(Localized.Enter, false);
+
+        void UpdateDisplay()
+        {
+            // The C# compiler is really dumb and thinks it can be null anyway.
+            // ReSharper disable ConditionIsAlwaysTrueOrFalse
+            if (song is null || description is null)
+                return;
+
+            song.Values.Clear();
+            Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
+
+            description.Title = Searcher.IsSearching
+                ? string.Format(Localized.Searching, Searcher.Query)
+                : Localized.Enter;
+
+            song.OnValueChange(Searcher.IsSearching ? 0 : Searcher.Song.IndexOf(Current));
+        }
+
+        void Input(char c) => Searcher.Process(c, UpdateDisplay);
+
         void Change(int x)
         {
             Play(Searcher.Song[x]);
@@ -228,6 +260,18 @@ static class Gramophone
 
         void Leave() => Audio.ResumeSnapshot(pause);
 
+        void EnterSong()
+        {
+            Enter();
+            TextInput.OnInput += Input;
+        }
+
+        void LeaveSong()
+        {
+            Leave();
+            TextInput.OnInput -= Input;
+        }
+
         Item Item(ParameterInstance p)
         {
             const int MaxValue = 1000;
@@ -242,19 +286,7 @@ static class Gramophone
                .Leave(Leave);
         }
 
-        var song = MakeSlider();
-        _ = song.Change(Change).Enter(Enter).Leave(Leave);
-
-        menu.AddItems(
-            song,
-            () =>
-            {
-                song.OnValueChange(Searcher.Song.IndexOf(Current));
-
-                song.Values.Clear();
-                Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
-            }
-        );
+        menu.AddItems(song.Change(Change).Enter(EnterSong).Leave(LeaveSong), description, UpdateDisplay);
 
         Refresh();
 

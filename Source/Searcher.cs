@@ -6,15 +6,35 @@ static class Searcher
 {
     static readonly string[] s_banned = { "char", "env", "game", "menu", "sound", "sfx", "ui" };
 
-    static readonly IList<string?> s_loading = new[] { "..." };
+    static readonly CharComparer s_comparer = new();
 
     static string? s_previous;
 
     static IList<string?>? s_songs;
 
+    internal static bool IsSearching { get; private set; }
+
     internal static bool IsSorted { get; private set; } = true;
 
-    internal static IList<string?> Song => s_songs ?? BeginSongs();
+    internal static IList<string?> Song => s_songs ??= Songs().ToGuardedLazily();
+
+    internal static StringBuilder Query { get; } = new();
+
+    internal static void Process(char c, Action reload)
+    {
+        if (!TryInsert(c))
+            return;
+
+        var current = Query.ToString();
+
+        s_songs = Song
+           .Select(Gramophone.MakeFriendly)
+           .OrderByDescending(x => x.JaroWinkler(current, s_comparer))
+           .ThenBy(Self, StringComparer.OrdinalIgnoreCase)
+           .ToGuardedLazily();
+
+        reload();
+    }
 
     internal static void Rearrange() => // ReSharper disable once AssignmentInConditionalExpression
         s_songs = ((IsSorted = !IsSorted)
@@ -22,17 +42,54 @@ static class Searcher
                 : s_songs?.Shuffle() as IEnumerable<string?>)
           ?.ToGuardedLazily();
 
-    static void Finish(List<string> list)
+    static void Play(string path)
     {
-        list.For(x => Logger.Log(nameof(Gramophone), x));
-        Gramophone.Previous = s_previous;
-        Gramophone.Stop();
+        if (IsSearching)
+            Audio.Play(path);
+    }
+
+    static bool TryInsert(char c)
+    {
+        const char
+            Backspace = '\b',
+            Enter = '\n',
+            Return = '\r';
+
+        const string
+            Character = "event:/ui/main/rename_entry_char",
+            Delete = "event:/ui/main/rename_entry_backspace",
+            In = "event:/ui/main/savefile_rename_start",
+            Out = "event:/ui/main/rename_entry_accept",
+            Whitespace = "event:/ui/main/rename_entry_space";
+
+        switch (c)
+        {
+            case Enter or Return:
+                MInput.Active = !(MInput.Disabled = IsSearching = !IsSearching);
+                Audio.Play(IsSearching ? In : Out);
+                break;
+            case Backspace:
+                (Query.Length is not 0).Then(Play)?.Invoke(Delete);
+                Query.Backspace();
+                break;
+            case var _ when !c.IsControl() && IsSearching:
+                Query.Append(c);
+                Play(c.IsWhitespace() ? Whitespace : Character);
+                break;
+        }
+
+        return IsSearching;
     }
 
     static string? Self(string? x) => x;
 
+    // ReSharper disable once UnusedMethodReturnValue.Local
+    static StringBuilder Backspace(this StringBuilder sb) => sb.Length is 0 ? sb : sb.Remove(sb.Length - 1, 1);
+
     static IEnumerable<string?> Songs()
     {
+        static void Finish(List<string> list) => list.For(x => Logger.Log(nameof(Gramophone), x));
+
         static bool Desired(string x) => x.StartsWith("event:/") && !s_banned.Any(x.Contains);
 
         static bool HasParams(string x)
@@ -69,10 +126,12 @@ static class Searcher
            .Peek(Finish);
     }
 
-    static IList<string?> BeginSongs()
+    sealed class CharComparer : IEqualityComparer<char>
     {
-        s_songs = s_loading;
-        new Thread(() => s_songs = Songs().ToGuardedLazily()).Start();
-        return s_songs;
+        /// <inheritdoc />
+        public bool Equals(char x, char y) => x.ToUpper() == y.ToUpper();
+
+        /// <inheritdoc />
+        public int GetHashCode(char obj) => obj.ToUpper();
     }
 }
