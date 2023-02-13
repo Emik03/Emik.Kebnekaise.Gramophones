@@ -18,36 +18,33 @@ static class Searcher
 
     internal static IList<string?> Song => s_songs ??= Songs().ToGuardedLazily();
 
-    internal static StringBuilder Query { get; } = new();
+    internal static string Query { get; set; } = "";
 
-    internal static void Process(char c, Slider song, SubHeader description, Action<Slider, SubHeader> reload)
+    internal static void Process(char c, Action reload)
     {
         if (!TryInsert(c))
-        {
-            (!IsSearching).Then(reload)?.Invoke(song, description);
             return;
-        }
 
-        var current = Query.ToString();
-
-        s_songs = Song
-           .OrderByDescending(x => Gramophone.MakeFriendly(x).JaroWinkler(current, s_comparer))
+        s_songs
+          ?.ToList()
+           .OrderByDescending(x => Gramophone.MakeFriendly(x).Jaro(Query, s_comparer))
            .ThenBy(Self, StringComparer.OrdinalIgnoreCase)
-           .ToGuardedLazily();
+           .For((x, i) => s_songs[i] = x);
 
-        reload(song, description);
+        reload();
     }
 
     internal static void Rearrange() => // ReSharper disable once AssignmentInConditionalExpression
         s_songs = ((IsSorted = !IsSorted)
-                ? s_songs?.OrderBy(Self, StringComparer.OrdinalIgnoreCase)
-                : s_songs?.Shuffle() as IEnumerable<string?>)
-          ?.ToGuardedLazily();
+            ? s_songs?.OrderBy(Self, StringComparer.OrdinalIgnoreCase)
+            : s_songs?.Shuffle() as IEnumerable<string?>)?.ToGuardedLazily();
 
     static void Play(string path)
     {
-        if (IsSearching)
-            Audio.Play(path);
+        if (!IsSearching)
+            return;
+
+        Audio.Play(path);
     }
 
     static bool TryInsert(char c)
@@ -72,10 +69,10 @@ static class Searcher
                 break;
             case Backspace:
                 (Query.Length is not 0).Then(Play)?.Invoke(Delete);
-                Query.Backspace();
+                Query = Query.Backspace();
                 break;
-            case var _ when !c.IsControl() && IsSearching:
-                Query.Append(c);
+            case var _ when !c.IsControl() && IsSearching && !(c.IsWhitespace() && Query.Length is 0):
+                Query = c.ToString();
                 Play(c.IsWhitespace() ? Whitespace : Character);
                 break;
         }
@@ -86,7 +83,7 @@ static class Searcher
     static string? Self(string? x) => x;
 
     // ReSharper disable once UnusedMethodReturnValue.Local
-    static StringBuilder Backspace(this StringBuilder sb) => sb.Length is 0 ? sb : sb.Remove(sb.Length - 1, 1);
+    static string Backspace(this string sb) => sb.Length is 0 ? sb : sb[..^1];
 
     static IEnumerable<string?> Songs()
     {

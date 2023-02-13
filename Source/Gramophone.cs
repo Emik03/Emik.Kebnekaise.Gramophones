@@ -6,6 +6,8 @@ static class Gramophone
 {
     const int MaxLength = 30;
 
+    static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
+
     static bool s_inhibit;
 
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
@@ -193,7 +195,7 @@ static class Gramophone
         song.Values.Clear();
         Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
         description.Title = DescriptionTitle();
-        description.ValueWiggler.Render();
+        description.Update();
     }
 
     static string DescriptionTitle() =>
@@ -201,7 +203,10 @@ static class Gramophone
 
     internal static string Friendly(int i) => MakeFriendly(Searcher.Song[i]);
 
-    internal static string MakeFriendly(string? s) => s?.Split(":/").LastOrDefault()?.StringHell() ?? Localized.None;
+    internal static string MakeFriendly(string? s) =>
+        s is null ? "" :
+        s_friendly.TryGetValue(s, out var val) ? val :
+        s_friendly[s] = s.Split(":/").LastOrDefault()?.StringHell() ?? Localized.None;
 
     static string Name(this ParameterInstance parameter)
     {
@@ -236,9 +241,7 @@ static class Gramophone
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
     {
         var song = MakeSlider();
-        var description = new SubHeader(Localized.Enter, false);
-
-        void Input(char c) => Searcher.Process(c, song, description, UpdateDisplay);
+        SubHeader description = new(Localized.Enter, false);
 
         void Change(int x)
         {
@@ -270,6 +273,8 @@ static class Gramophone
         }
 
         void Update() => UpdateDisplay(song, description);
+
+        void Input(char c) => Searcher.Process(c, Update);
 
         Item Item(ParameterInstance p)
         {
