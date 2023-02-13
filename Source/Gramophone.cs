@@ -193,6 +193,7 @@ static class Gramophone
         song.Values.Clear();
         Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
         description.Title = DescriptionTitle();
+        description.ValueWiggler.Render();
     }
 
     static string DescriptionTitle() =>
