@@ -26,7 +26,7 @@ static class Gramophone
     static Localized.LocalString Label => Searcher.IsSorted ? Localized.Shuffle : Localized.Sort;
 
     internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self) =>
-        IsPlaying.NotThen(orig)?.Invoke(self);
+        (!IsPlaying).Then(orig)?.Invoke(self);
 
     internal static void Inhibit() => s_inhibit = !s_inhibit;
 
@@ -53,7 +53,8 @@ static class Gramophone
 
     internal static void Play(string? song)
     {
-        _ = IsPlaying.NotThen(() => Previous = Audio.CurrentMusic);
+        if (!IsPlaying)
+            Previous = Audio.CurrentMusic;
 
         // Temporarily assign to false to allow the song to be played.
         IsPlaying = false;
