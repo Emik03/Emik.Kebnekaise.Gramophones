@@ -10,13 +10,12 @@ static class Searcher
 
     internal static bool IsSorted { get; private set; } = true;
 
-    internal static IList<string?> Song => s_songs ?? BeginSongs();
+    internal static IList<string?> Song => s_songs = Songs().ToGuardedLazily();
 
-    internal static void Rearrange() => // ReSharper disable once AssignmentInConditionalExpression
+    internal static void Rearrange() =>
         s_songs = ((IsSorted = !IsSorted)
-                ? s_songs?.OrderBy(Self, StringComparer.OrdinalIgnoreCase)
-                : s_songs?.Shuffle() as IEnumerable<string?>)
-          ?.ToGuardedLazily();
+            ? s_songs?.OrderBy(Self, StringComparer.OrdinalIgnoreCase)
+            : s_songs?.Shuffle().AsEnumerable())?.ToGuardedLazily();
 
     static void Finish(List<string> list)
     {
@@ -57,12 +56,5 @@ static class Searcher
            .OrderBy(Self, StringComparer.OrdinalIgnoreCase)
            .ToList()
            .Peek(Finish);
-    }
-
-    static IList<string?> BeginSongs()
-    {
-        s_songs = s_loading;
-        new Thread(() => s_songs = Songs().ToGuardedLazily()).Start();
-        return s_songs;
     }
 }

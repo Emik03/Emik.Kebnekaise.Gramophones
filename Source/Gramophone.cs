@@ -6,7 +6,7 @@ static class Gramophone
 {
     const int MaxLength = 31;
 
-    static bool s_inhibit, s_isAudioReady;
+    static bool s_inhibit;
 
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
     static IList<Item>? s_items;
@@ -31,29 +31,27 @@ static class Gramophone
 
     internal static void Inhibit() => s_inhibit = !s_inhibit;
 
-#pragma warning disable IDE0060, RCS1163
-    internal static void IndicateAudioIsReady(Session session, bool fromsavedata) => s_isAudioReady = true;
-#pragma warning restore IDE0060, RCS1163
-
-    internal static void MuteAmbience() => AudioSession(ambience: "").Apply();
+    internal static void MuteAmbience() => NewAudioState(ambience: "").Apply();
 
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
-        Item? item = null;
+        var button = new Button(Localized.Gramo);
+        button.Pressed(Press);
 
         void Press()
         {
-            menu.RemoveSelf();
-
-            if (level is null)
+            if (level is null || menu is null)
                 return;
 
-            var i = menu.IndexOf(item);
+            menu.RemoveSelf();
+            var self = menu.IndexOf(button);
+
             level.PauseMainMenuOpen = false;
-            level.Screen(i, minimal);
+            level.Screen(self, minimal);
         }
 
-        _ = GramophoneModule.Settings.Menu.Then(() => menu?.Add(new Button(Localized.Gramo).Pressed(Press)));
+        if (GramophoneModule.Settings.Menu)
+            menu?.Add(button);
     }
 
     internal static void Play(string? song)
@@ -63,7 +61,7 @@ static class Gramophone
 
         // Temporarily assign to false to allow the song to be played.
         IsPlaying = false;
-        AudioSession(Previous).Apply();
+        NewAudioState(Previous).Apply();
         IsPlaying = true;
 
         Current = song;
@@ -107,13 +105,12 @@ static class Gramophone
     internal static void Stop()
     {
         IsPlaying = false;
-        AudioSession(Previous).Apply();
+        NewAudioState(Previous).Apply();
     }
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
-        if (s_isAudioReady)
-            _ = Searcher.Song;
+        _ = Searcher.Song;
 
         if (!IsPlaying)
             return orig?.Invoke(path, startPlaying, allowFadeOut) ?? false;
@@ -208,7 +205,7 @@ static class Gramophone
         return description.name;
     }
 
-    static Celeste.AudioState AudioSession(string? music = null, string? ambience = null) =>
+    static Celeste.AudioState NewAudioState(string? music = null, string? ambience = null) =>
         new(music ?? Audio.CurrentMusic, ambience ?? CurrentAmbience());
 
     static Slider MakeSlider()
