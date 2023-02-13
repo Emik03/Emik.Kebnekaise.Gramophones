@@ -21,8 +21,6 @@ static class Gramophone
 
     internal static string? Current { get; set; }
 
-    static Celeste.AudioState AudioSession => ((Level)Engine.Scene).Session.Audio;
-
     static Localized.LocalString Label => Searcher.IsSorted ? Localized.Shuffle : Localized.Sort;
 
     internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self)
@@ -37,12 +35,7 @@ static class Gramophone
     internal static void IndicateAudioIsReady(Session session, bool fromsavedata) => s_isAudioReady = true;
 #pragma warning restore IDE0060, RCS1163
 
-    internal static void MuteAmbience()
-    {
-        Audio.SetAmbience("");
-        AudioSession.Ambience.Event = "";
-        AudioSession.Apply();
-    }
+    internal static void MuteAmbience() => AudioSession(ambience: "").Apply();
 
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
@@ -65,11 +58,14 @@ static class Gramophone
 
     internal static void Play(string? song)
     {
-        _ = IsPlaying.NotThen(() => Previous = Audio.CurrentMusic);
+        if (!IsPlaying)
+            Previous = Audio.CurrentMusic;
 
         // Temporarily assign to false to allow the song to be played.
         IsPlaying = false;
-        Set(song, true);
+        AudioSession(Previous).Apply();
+        IsPlaying = true;
+
         Current = song;
 
         s_parameters = Audio
@@ -108,7 +104,11 @@ static class Gramophone
            .For(x => x.setValue(v));
     }
 
-    internal static void Stop() => Set(Previous, false);
+    internal static void Stop()
+    {
+        IsPlaying = false;
+        AudioSession(Previous).Apply();
+    }
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
@@ -161,14 +161,6 @@ static class Gramophone
         s_items.Select(menu.Add).Enumerate();
     }
 
-    static void Set(string? path, bool isPlaying)
-    {
-        Audio.SetMusic(path);
-        IsPlaying = isPlaying;
-        AudioSession.Music.Event = path;
-        AudioSession.Apply();
-    }
-
     static void Screen(this Level? level, int returnIndex, bool minimal)
     {
         const string PauseSnapshot = nameof(PauseSnapshot);
@@ -194,6 +186,12 @@ static class Gramophone
         level?.Add(menu);
     }
 
+    static string CurrentAmbience() =>
+        Audio.CurrentAmbienceEventInstance?.getDescription(out var a) is RESULT.OK &&
+        a?.getPath(out var path) is RESULT.OK
+            ? path
+            : "";
+
     static string Friendly(int i) =>
         i.Index()?.Replace("music:/", "").Replace("event:/", "") is { } wide
             ? (wide.Reverse().Take(MaxLength) is var thin &&
@@ -209,6 +207,9 @@ static class Gramophone
         parameter.getDescription(out var description);
         return description.name;
     }
+
+    static Celeste.AudioState AudioSession(string? music = null, string? ambience = null) =>
+        new(music ?? Audio.CurrentMusic, ambience ?? CurrentAmbience());
 
     static Slider MakeSlider()
     {

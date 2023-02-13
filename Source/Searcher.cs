@@ -6,10 +6,6 @@ static class Searcher
 {
     static readonly string[] s_banned = { "char", "env", "game", "menu", "sound", "sfx", "ui" };
 
-    static readonly IList<string?> s_loading = new[] { "..." };
-
-    static string? s_previous;
-
     static IList<string?>? s_songs;
 
     internal static bool IsSorted { get; private set; } = true;
@@ -25,7 +21,6 @@ static class Searcher
     static void Finish(List<string> list)
     {
         list.For(x => Logger.Log(nameof(Gramophone), x));
-        Gramophone.Previous = s_previous;
         Gramophone.Stop();
     }
 
@@ -35,12 +30,7 @@ static class Searcher
     {
         static bool Desired(string x) => x.StartsWith("event:/") && !s_banned.Any(x.Contains);
 
-        static bool HasParams(string x)
-        {
-            s_previous ??= Audio.CurrentMusic;
-            var count = 0;
-            return Please.Try(Audio.GetEventDescription, x).Ok?.getParameterCount(out count) is var _ && count is not 0;
-        }
+        static bool HasParams(string x) => Please.Try(Audio.GetEventDescription, x).Ok is not null;
 
         static bool HasSongGuids(ZipEntry x) => x.FileName.EndsWith(".guids.txt");
 
