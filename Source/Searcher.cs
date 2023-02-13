@@ -24,7 +24,7 @@ static class Searcher
     {
         if (!TryInsert(c))
         {
-            IsSearching.NotThen(reload)?.Invoke(song, description);
+            (!IsSearching).Then(reload)?.Invoke(song, description);
             return;
         }
 
