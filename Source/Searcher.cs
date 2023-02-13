@@ -2,6 +2,8 @@
 #pragma warning disable SA1600
 namespace Emik.Kebnekaise.Gramophones;
 
+using static StringComparer;
+
 static class Searcher
 {
     static readonly string[] s_banned = { "char", "env", "game", "menu", "sound", "sfx", "ui" };
@@ -14,7 +16,7 @@ static class Searcher
 
     internal static void Rearrange() =>
         s_songs = ((IsSorted = !IsSorted)
-            ? s_songs?.OrderBy(Self, StringComparer.OrdinalIgnoreCase)
+            ? s_songs?.OrderBy(Self, OrdinalIgnoreCase)
             : s_songs?.Shuffle().AsEnumerable())?.ToGuardedLazily();
 
     static void Finish(List<string> list)
@@ -44,16 +46,15 @@ static class Searcher
 
         return Please
            .Try(Directory.GetFiles, PathMods, "*.zip")
-           .SelectMany(Enumerable.AsEnumerable)
+           .Flatten()
            .Select(AllFiles)
-           .SelectMany(Enumerable.AsEnumerable)
-           .SelectMany(Enumerable.AsEnumerable)
+           .Flatten2()
            .Where(HasSongGuids)
            .SelectMany(Read)
            .Where(Desired)
            .Where(HasParams)
-           .Distinct(StringComparer.OrdinalIgnoreCase)
-           .OrderBy(Self, StringComparer.OrdinalIgnoreCase)
+           .Distinct(OrdinalIgnoreCase)
+           .OrderBy(Self, OrdinalIgnoreCase)
            .ToList()
            .Peek(Finish);
     }

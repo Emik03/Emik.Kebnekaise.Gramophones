@@ -4,14 +4,10 @@ namespace Emik.Kebnekaise.Gramophones;
 
 static class Gramophone
 {
-    const int MaxLength = 31;
-
-    static bool s_inhibit;
+    const int MaxLength = 30;
 
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
-    static IList<Item>? s_items;
-
-    static IList<Item>? s_old;
+    static IList<Item>? s_items, s_old;
 
     static IList<ParameterInstance>? s_parameters;
 
@@ -21,15 +17,11 @@ static class Gramophone
 
     internal static string? Current { get; set; }
 
-    static Localized.LocalString Label => Searcher.IsSorted ? Localized.Shuffle : Localized.Sort;
-
     internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self)
     {
         if (!IsPlaying)
             orig?.Invoke(self);
     }
-
-    internal static void Inhibit() => s_inhibit = !s_inhibit;
 
     internal static void MuteAmbience() => NewAudioState(ambience: "").Apply();
 
@@ -50,7 +42,7 @@ static class Gramophone
             level.Screen(self, minimal);
         }
 
-        if (GramophoneModule.Settings.Menu)
+        if (GramophoneModule.Settings.Visible)
             menu?.Add(button);
     }
 
@@ -74,7 +66,7 @@ static class Gramophone
     }
 
     internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value) =>
-        (s_inhibit || !IsPlaying).Then(orig)?.Invoke(path, value);
+        (GramophoneModule.Settings.Inhibit || !IsPlaying).Then(orig)?.Invoke(path, value);
 
     internal static void SetParameter(
         OnAudio.orig_SetParameter orig,
@@ -82,7 +74,7 @@ static class Gramophone
         string param,
         float value
     ) =>
-        (s_inhibit || !IsPlaying).Then(orig)?.Invoke(instance, param, value);
+        (GramophoneModule.Settings.Inhibit || !IsPlaying).Then(orig)?.Invoke(instance, param, value);
 
     internal static void SetParam(string? param, string? value)
     {
@@ -92,13 +84,7 @@ static class Gramophone
         _ = float.TryParse(value, out var v);
 
         s_parameters
-          ?.Where(
-                x =>
-                {
-                    x.getDescription(out var d);
-                    return param.Equals(d.name);
-                }
-            )
+          ?.Where(x => x.getDescription(out var d) is RESULT.OK && d.name == param)
            .For(x => x.setValue(v));
     }
 
@@ -120,9 +106,9 @@ static class Gramophone
         return false;
     }
 
-    static void AddItems(this TextMenu menu, Item song, Action onChange)
+    internal static void AddItems(this TextMenu menu, Item song, Action onChange)
     {
-        var shuffle = new Button(Label);
+        Button shuffle = new(Localized.DynamicShuffle);
 
         var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step)
            .Change(
@@ -137,7 +123,7 @@ static class Gramophone
             () =>
             {
                 Searcher.Rearrange();
-                shuffle.Label = Label;
+                shuffle.Label = Localized.DynamicShuffle;
                 shuffle.Update();
                 onChange();
             }
@@ -150,7 +136,7 @@ static class Gramophone
             new Button(Localized.Stop).Pressed(Stop),
             new Button(Localized.Ambience).Pressed(MuteAmbience),
             shuffle,
-            new OnOff(Localized.Params, s_inhibit).Change(x => s_inhibit = x),
+            new OnOff(Localized.Inhibit, GramophoneModule.Settings.Inhibit).Change(GramophoneModule.ChangeInhibit),
             step,
             song,
         };
@@ -189,15 +175,25 @@ static class Gramophone
             ? path
             : "";
 
-    static string Friendly(int i) =>
-        i.Index()?.Replace("music:/", "").Replace("event:/", "") is { } wide
-            ? (wide.Reverse().Take(MaxLength) is var thin &&
-                wide.Length > MaxLength
-                    ? thin.Concat(new[] { '\u2026' })
-                    : thin)
+    static string Friendly(int i) => MakeFriendly(Searcher.Song[i]);
+
+    static string MakeFriendly(string? s) => s?.Split(":/").LastOrDefault()?.StringHell() ?? Localized.None;
+
+    static string StringHell(this string wide)
+    {
+        var seenSlash = false;
+
+        return wide
+           .Replace('_', ' ')
+           .Replace('-', ' ')
+           .Reverse()
+           .SelectMany(x => x is '/' ? !seenSlash && (seenSlash = true) ? "\n" : " > " : $"{x}")
            .Reverse()
            .Conjoin()
-            : Localized.None;
+           .Split('\n')
+           .Select(x => x.Length <= MaxLength ? x : x.Reverse().Take(MaxLength).Append('\u2026').Reverse().Conjoin())
+           .Conjoin('\n');
+    }
 
     static string Name(this ParameterInstance parameter)
     {
@@ -257,14 +253,12 @@ static class Gramophone
             () =>
             {
                 song.OnValueChange(Searcher.Song.IndexOf(Current));
-
                 song.Values.Clear();
                 Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
             }
         );
 
         Refresh();
-
         return menu;
     }
 }

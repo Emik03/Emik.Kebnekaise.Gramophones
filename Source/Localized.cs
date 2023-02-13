@@ -6,6 +6,8 @@ static class Localized
 {
     internal static LocalString Ambience { get; } = new(nameof(Ambience));
 
+    internal static LocalString DynamicShuffle => Searcher.IsSorted ? Shuffle : Sort;
+
     internal static LocalString Enable { get; } = new(nameof(Enable));
 
     internal static LocalString Gramo { get; } = new(nameof(Gramo));
@@ -14,7 +16,7 @@ static class Localized
 
     internal static LocalString None { get; } = new(nameof(None));
 
-    internal static LocalString Params { get; } = new(nameof(Params));
+    internal static LocalString Inhibit { get; } = new(nameof(Inhibit));
 
     internal static LocalString Shuffle { get; } = new(nameof(Shuffle));
 

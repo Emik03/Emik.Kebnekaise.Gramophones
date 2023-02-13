@@ -23,10 +23,12 @@ public sealed class GramophoneModule : EverestModule
     public static void Change(string? param, string? value) => Gramophone.SetParam(param, value);
 
     [Command("gramophone_inhibit", "[Gramophone] Toggles if the map is allowed to change song parameter values")]
-    public static void Inhibit() => Gramophone.Inhibit();
+    public static void Inhibit() => ChangeInhibit(!Settings.Inhibit);
 
     [Command("gramophone_stop", "[Gramophone] Stop a song")]
     public static void Stop() => Gramophone.Stop();
+
+    public static void ChangeInhibit(bool b) => Settings.Inhibit = b;
 
     public override void CreateModMenuSection(TextMenu? menu, bool inGame, EventInstance? snapshot)
     {
@@ -35,7 +37,10 @@ public sealed class GramophoneModule : EverestModule
         new[]
         {
             new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
-            new OnOff(Localized.Menu, Settings.Menu).Change(x => Settings.Menu = x),
+            new OnOff(Localized.Menu, Settings.Visible).Change(x => Settings.Visible = x),
+            new Button(Localized.Ambience).Pressed(Ambience),
+            new OnOff(Localized.Inhibit, Settings.Inhibit).Pressed(Inhibit),
+            new Button(Localized.Stop).Pressed(Stop),
         }.For(x => menu?.Add(x));
     }
 
