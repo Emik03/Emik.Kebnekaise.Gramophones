@@ -6,7 +6,7 @@ static class Searcher
 {
     static readonly string[] s_banned = { "char", "env", "game", "menu", "sound", "sfx", "ui" };
 
-    static readonly CharComparer s_comparer = new();
+    static readonly CaseInsensitiveCharComparer s_comparer = new();
 
     static string? s_previous;
 
@@ -129,7 +129,7 @@ static class Searcher
            .Peek(Finish);
     }
 
-    sealed class CharComparer : IEqualityComparer<char>
+    sealed class CaseInsensitiveCharComparer : IEqualityComparer<char>
     {
         /// <inheritdoc />
         public bool Equals(char x, char y) => x.ToUpper() == y.ToUpper();

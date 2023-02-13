@@ -34,21 +34,21 @@ static class Gramophone
 
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
-        Item? item = null;
+        Button button = new(Localized.Gramo);
+        button.Pressed(Press);
 
         void Press()
         {
-            menu.RemoveSelf();
-
-            if (level is null)
+            if (level is null || menu is null)
                 return;
 
-            var i = menu.IndexOf(item);
+            menu.RemoveSelf();
+            var i = menu.IndexOf(button);
             level.PauseMainMenuOpen = false;
             level.Screen(i, minimal);
         }
 
-        _ = GramophoneModule.Settings.Menu.Then(() => menu?.Add(new Button(Localized.Gramo).Pressed(Press)));
+        _ = GramophoneModule.Settings.Menu.Then(() => menu?.Add(button));
     }
 
     internal static void Play(string? song)
