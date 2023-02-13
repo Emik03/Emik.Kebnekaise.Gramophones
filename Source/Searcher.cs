@@ -98,8 +98,7 @@ static class Searcher
         static bool HasParams(string x)
         {
             s_previous ??= Audio.CurrentMusic;
-            var count = 0;
-            return Please.Try(Audio.GetEventDescription, x).Ok?.getParameterCount(out count) is var _ && count is not 0;
+            return Please.Try(Audio.GetEventDescription, x).Ok is not null;
         }
 
         static bool HasSongGuids(ZipEntry x) => x.FileName.EndsWith(".guids.txt");

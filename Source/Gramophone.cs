@@ -111,7 +111,7 @@ static class Gramophone
 
     static void AddItems(this TextMenu menu, Item song, Item description, Action onChange)
     {
-        var shuffle = new Button(Label);
+        Button shuffle = new(Label);
 
         var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step)
            .Change(
