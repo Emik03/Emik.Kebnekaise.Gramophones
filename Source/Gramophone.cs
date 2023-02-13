@@ -19,8 +19,11 @@ static class Gramophone
 
     internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self)
     {
-        if (!IsPlaying)
-            orig?.Invoke(self);
+        if (IsPlaying)
+            return;
+
+        orig?.Invoke(self);
+        Previous = self?.Music.Event;
     }
 
     internal static void MuteAmbience() => NewAudioState(ambience: "").Apply();
@@ -96,13 +99,10 @@ static class Gramophone
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
-        _ = Searcher.Song;
-
         if (!IsPlaying)
             return orig?.Invoke(path, startPlaying, allowFadeOut) ?? false;
 
         Previous = path;
-
         return false;
     }
 

@@ -12,12 +12,14 @@ static class Searcher
 
     internal static bool IsSorted { get; private set; } = true;
 
-    internal static IList<string?> Song => s_songs = Songs().ToGuardedLazily();
+    internal static IList<string?> Song => s_songs ??= Songs().ToGuardedLazily();
 
     internal static void Rearrange() =>
         s_songs = ((IsSorted = !IsSorted)
             ? s_songs?.OrderBy(Self, OrdinalIgnoreCase)
             : s_songs?.Shuffle().AsEnumerable())?.ToGuardedLazily();
+
+    internal static IList<string?> Refresh() => s_songs = Songs().ToGuardedLazily();
 
     static void Finish(List<string> list)
     {
