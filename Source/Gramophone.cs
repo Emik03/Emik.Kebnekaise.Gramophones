@@ -21,9 +21,11 @@ static class Gramophone
 
     internal static string? Current { get; set; }
 
-    static Celeste.AudioState? AudioSession => (Engine.Scene as Level)?.Session.Audio;
+    static string DescriptionText => Searcher.IsSearching ? Localized.Searching : Localized.Enter;
 
-    static Localized.LocalString Label => Searcher.IsSorted ? Localized.Shuffle : Localized.Sort;
+    static string ShuffleText => Searcher.IsSorted ? Localized.Shuffle : Localized.Sort;
+
+    static Celeste.AudioState? AudioSession => (Engine.Scene as Level)?.Session.Audio;
 
     internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self) =>
         (!IsPlaying).Then(orig)?.Invoke(self);
@@ -104,17 +106,14 @@ static class Gramophone
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
-        if (!IsPlaying)
-            return orig?.Invoke(path, startPlaying, allowFadeOut) ?? false;
-
+        _ = Searcher.Song;
         Previous = path;
-
-        return false;
+        return !IsPlaying && (orig?.Invoke(path, startPlaying, allowFadeOut) ?? false);
     }
 
     static void AddItems(this TextMenu menu, Item song, Item description, Action onChange)
     {
-        Button shuffle = new(Label);
+        Button shuffle = new(ShuffleText);
 
         var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step)
            .Change(
@@ -129,7 +128,7 @@ static class Gramophone
             () =>
             {
                 Searcher.Rearrange();
-                shuffle.Label = Label;
+                shuffle.Label = ShuffleText;
                 shuffle.Update();
                 onChange();
             }
@@ -196,7 +195,7 @@ static class Gramophone
         song.Index = Searcher.IsSearching ? 0 : Searcher.Song.IndexOf(Current);
         song.OnValueChange(song.Index);
         song.Values.Count.For(i => song.Values[i] = new(Friendly(i), i)).Enumerate();
-        description.Title = DescriptionTitle().Replace(Localized.SearchTemplate, Searcher.Query);
+        description.Title = DescriptionText.Replace(Localized.SearchTemplate, Searcher.Query);
 
         Logger.Log(LogLevel.Error, nameof(Gramophone), Searcher.Query);
 
@@ -209,8 +208,6 @@ static class Gramophone
 
     static bool IsBanned(this EventInstance? instance) =>
         instance?.getDescription(out var a) is RESULT.OK && a.getPath(out var b) is RESULT.OK && b.IsBanned();
-
-    static string DescriptionTitle() => Searcher.IsSearching ? Localized.Searching : Localized.Enter;
 
     internal static string Friendly(int i) => MakeFriendly(Searcher.Song[i]);
 

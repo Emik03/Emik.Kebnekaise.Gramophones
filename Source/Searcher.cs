@@ -130,16 +130,23 @@ static class Searcher
             return reader.ReadToEnd().Split();
         }
 
+        static IEnumerable<string> Local() =>
+            Please
+               .Try(Directory.GetFiles, PathMods, "*.guids.txt", SearchOption.AllDirectories)
+               .SelectMany(Enumerable.AsEnumerable)
+               .SelectMany(x => Please.Try(File.ReadAllText, x));
+
         static IEnumerable<ZipFile> AllFiles(string? x) => Please.Try(ZipFile.Read, x);
 
         return Please
-           .Try(Directory.GetFiles, PathMods, "*.zip")
+           .Try(Directory.GetFiles, PathMods, "*.zip", SearchOption.AllDirectories)
            .SelectMany(Enumerable.AsEnumerable)
            .Select(AllFiles)
            .SelectMany(Enumerable.AsEnumerable)
            .SelectMany(Enumerable.AsEnumerable)
            .Where(HasSongGuids)
            .SelectMany(Read)
+           .Concat(Local())
            .Where(Desired)
            .Where(HasParams)
            .Distinct(StringComparer.OrdinalIgnoreCase)
