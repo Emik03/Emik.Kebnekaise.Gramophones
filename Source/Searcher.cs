@@ -20,6 +20,8 @@ static class Searcher
 
     internal static string Query { get; set; } = "";
 
+    internal static bool IsBanned(string? path) => path is not null && s_banned.Any(path.Contains);
+
     internal static void Process(char c, Action reload)
     {
         if (!TryInsert(c))

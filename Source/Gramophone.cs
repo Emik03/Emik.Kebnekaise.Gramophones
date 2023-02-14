@@ -79,7 +79,7 @@ static class Gramophone
         string param,
         float value
     ) =>
-        (s_inhibit || !IsPlaying).Then(orig)?.Invoke(instance, param, value);
+        (s_inhibit || !IsPlaying || instance.IsBanned()).Then(orig)?.Invoke(instance, param, value);
 
     internal static void SetParam(string? param, string? value)
     {
@@ -197,6 +197,9 @@ static class Gramophone
         description.Title = DescriptionTitle();
         description.Update();
     }
+
+    static bool IsBanned(this EventInstance instance) =>
+        instance.getDescription(out var a) is RESULT.OK && a.getPath(out var b) is RESULT.OK && Searcher.IsBanned(b);
 
     static string DescriptionTitle() =>
         Searcher.IsSearching ? string.Format(Localized.Searching, Searcher.Query) : Localized.Enter;
