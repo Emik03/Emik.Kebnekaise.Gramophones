@@ -4,7 +4,7 @@ namespace Emik.Kebnekaise.Gramophones;
 
 static class Gramophone
 {
-    const int MaxLength = 30;
+    public const int MaxLength = 30;
 
     static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
 
@@ -71,7 +71,7 @@ static class Gramophone
     }
 
     internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value) =>
-        (s_inhibit || !IsPlaying).Then(orig)?.Invoke(path, value);
+        (s_inhibit || !IsPlaying || path.IsBanned()).Then(orig)?.Invoke(path, value);
 
     internal static void SetParameter(
         OnAudio.orig_SetParameter orig,
@@ -134,7 +134,7 @@ static class Gramophone
             }
         );
 
-        s_items = new[]
+        s_items = new List<Item>
         {
             new Header(Localized.Gramo),
             new SubHeader(Localized.Which),
@@ -147,6 +147,7 @@ static class Gramophone
             description,
         };
 
+        s_old?.For(s_items.Add);
         s_items.Select(menu.Add).Enumerate();
     }
 
@@ -192,17 +193,22 @@ static class Gramophone
             return;
 
         song.OnValueChange(Searcher.IsSearching ? 0 : Searcher.Song.IndexOf(Current));
-        song.Values.Clear();
-        Searcher.Song.Count.For(x => song.Add(Friendly(x), x, x is 0)).Enumerate();
-        description.Title = DescriptionTitle();
-        description.Update();
+        song.Values.Count.For(i => song.Values[i] = new(Friendly(i), i)).Enumerate();
+        description.Title = DescriptionTitle().Replace(Localized.SearchTemplate, Searcher.Query);
+
+        Logger.Log(LogLevel.Error, nameof(Gramophone), Searcher.Query);
+
+        var container = description.Container;
+        var i = container.IndexOf(description);
+
+        container.Remove(description);
+        container.Insert(i, description);
     }
 
-    static bool IsBanned(this EventInstance instance) =>
-        instance.getDescription(out var a) is RESULT.OK && a.getPath(out var b) is RESULT.OK && Searcher.IsBanned(b);
+    static bool IsBanned(this EventInstance? instance) =>
+        instance?.getDescription(out var a) is RESULT.OK && a.getPath(out var b) is RESULT.OK && b.IsBanned();
 
-    static string DescriptionTitle() =>
-        Searcher.IsSearching ? string.Format(Localized.Searching, Searcher.Query) : Localized.Enter;
+    static string DescriptionTitle() => Searcher.IsSearching ? Localized.Searching : Localized.Enter;
 
     internal static string Friendly(int i) => MakeFriendly(Searcher.Song[i]);
 

@@ -20,26 +20,41 @@ static class Searcher
 
     internal static string Query { get; set; } = "";
 
-    internal static bool IsBanned(string? path) => path is not null && s_banned.Any(path.Contains);
+    internal static bool IsBanned(this string? path) => path is not null && s_banned.Any(path.Contains);
 
     internal static void Process(char c, Action reload)
     {
         if (!TryInsert(c))
+        {
+            // Update description to reflect that we're no longer searching.
+            reload();
+            return;
+        }
+
+        if (s_songs is null)
             return;
 
         s_songs
-          ?.ToList()
-           .OrderByDescending(x => Gramophone.MakeFriendly(x).Jaro(Query, s_comparer))
+           .OrderByDescending(x => Gramophone.MakeFriendly(x).JaroWinkler(Query, s_comparer))
            .ThenBy(Self, StringComparer.OrdinalIgnoreCase)
+           .ToList()
            .For((x, i) => s_songs[i] = x);
 
         reload();
     }
 
-    internal static void Rearrange() => // ReSharper disable once AssignmentInConditionalExpression
-        s_songs = ((IsSorted = !IsSorted)
-            ? s_songs?.OrderBy(Self, StringComparer.OrdinalIgnoreCase)
-            : s_songs?.Shuffle() as IEnumerable<string?>)?.ToGuardedLazily();
+    // ReSharper disable once AssignmentInConditionalExpression
+    internal static void Rearrange()
+    {
+        if (s_songs is null)
+            return;
+
+        var sorted = (IsSorted = !IsSorted)
+            ? s_songs.OrderBy(Self, StringComparer.OrdinalIgnoreCase)
+            : s_songs.Shuffle() as IEnumerable<string?>;
+
+        sorted.ToList().For((x, i) => s_songs[i] = x);
+    }
 
     static void Play(string path)
     {
@@ -67,14 +82,21 @@ static class Searcher
         {
             case Enter or Return:
                 MInput.Active = !(MInput.Disabled = IsSearching = !IsSearching);
+
+                if (IsSearching)
+                    Query = "";
+
                 Audio.Play(IsSearching ? In : Out);
                 break;
             case Backspace:
                 (Query.Length is not 0).Then(Play)?.Invoke(Delete);
                 Query = Query.Backspace();
                 break;
-            case var _ when !c.IsControl() && IsSearching && !(c.IsWhitespace() && Query.Length is 0):
-                Query = c.ToString();
+            case var _ when !c.IsControl() &&
+                IsSearching &&
+                !(c.IsWhitespace() && Query.Length is 0) &&
+                Query.Length < Gramophone.MaxLength:
+                Query += c;
                 Play(c.IsWhitespace() ? Whitespace : Character);
                 break;
         }
