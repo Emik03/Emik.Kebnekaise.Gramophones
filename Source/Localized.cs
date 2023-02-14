@@ -5,10 +5,9 @@ namespace Emik.Kebnekaise.Gramophones;
 static class Localized
 {
     public const string
-        CurrentTemplate = "(current)",
-        PercentTemplate = "(percent)",
-        SearchTemplate = "(search)",
-        UpperTemplate = "(upper)";
+        PercentTemplate = "(P)",
+        SearchTemplate = "(S)",
+        UpperTemplate = "(U)";
 
     internal static LocalString Ambience { get; } = new(nameof(Ambience));
 

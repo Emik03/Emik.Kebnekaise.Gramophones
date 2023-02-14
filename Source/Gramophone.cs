@@ -203,7 +203,6 @@ static class Gramophone
 
         description.Title = DescriptionText
            .Replace(Localized.SearchTemplate, Searcher.Query)
-           .Replace(Localized.CurrentTemplate, $"{currentIndex + 1}")
            .Replace(Localized.PercentTemplate, $"{NewValue()}")
            .Replace(Localized.UpperTemplate, $"{upper + 1}");
 
