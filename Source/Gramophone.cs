@@ -8,8 +8,6 @@ static class Gramophone
 
     static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
 
-    static bool s_inhibit;
-
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
     static IList<Item>? s_items;
 
@@ -30,7 +28,9 @@ static class Gramophone
     internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self) =>
         (!IsPlaying).Then(orig)?.Invoke(self);
 
-    internal static void Inhibit() => s_inhibit = !s_inhibit;
+    internal static void Inhibit() => Inhibit(!GramophoneModule.Settings.Inhibit);
+
+    internal static void Inhibit(bool x) => GramophoneModule.Settings.Inhibit = x;
 
     internal static void MuteAmbience() => Audio.CurrentAmbienceEventInstance?.stop(STOP_MODE.ALLOWFADEOUT);
 
@@ -71,7 +71,7 @@ static class Gramophone
     }
 
     internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value) =>
-        (s_inhibit || !IsPlaying || path.IsBanned()).Then(orig)?.Invoke(path, value);
+        (GramophoneModule.Settings.Inhibit || !IsPlaying || path.IsBanned()).Then(orig)?.Invoke(path, value);
 
     internal static void SetParameter(
         OnAudio.orig_SetParameter orig,
@@ -79,7 +79,8 @@ static class Gramophone
         string param,
         float value
     ) =>
-        (s_inhibit || !IsPlaying || instance.IsBanned()).Then(orig)?.Invoke(instance, param, value);
+        (GramophoneModule.Settings.Inhibit || !IsPlaying || instance.IsBanned()).Then(orig)
+      ?.Invoke(instance, param, value);
 
     internal static void SetParam(string? param, string? value)
     {
@@ -141,7 +142,7 @@ static class Gramophone
             new Button(Localized.Stop).Pressed(Stop),
             new Button(Localized.Ambience).Pressed(MuteAmbience),
             shuffle,
-            new OnOff(Localized.Params, s_inhibit).Change(x => s_inhibit = x),
+            new OnOff(Localized.Params, GramophoneModule.Settings.Inhibit).Change(Inhibit),
             step,
             song,
             description,
@@ -192,7 +193,8 @@ static class Gramophone
         if (song is null || description is null)
             return;
 
-        song.OnValueChange(Searcher.IsSearching ? 0 : Searcher.Song.IndexOf(Current));
+        song.Index = Searcher.IsSearching ? 0 : Searcher.Song.IndexOf(Current);
+        song.OnValueChange(song.Index);
         song.Values.Count.For(i => song.Values[i] = new(Friendly(i), i)).Enumerate();
         description.Title = DescriptionTitle().Replace(Localized.SearchTemplate, Searcher.Query);
 
