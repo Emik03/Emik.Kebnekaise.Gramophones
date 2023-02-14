@@ -189,21 +189,29 @@ static class Gramophone
 
     static void UpdateDisplay(Slider? song, SubHeader? description)
     {
+        int NewValue() => (int)(Searcher.Score(song.Values.FirstOrDefault()?.Item1) * 100);
+
         if (song is null || description is null)
             return;
 
-        song.Index = Searcher.IsSearching ? 0 : Searcher.Song.IndexOf(Current);
-        song.OnValueChange(song.Index);
-        song.Values.Count.For(i => song.Values[i] = new(Friendly(i), i)).Enumerate();
-        description.Title = DescriptionText.Replace(Localized.SearchTemplate, Searcher.Query);
+        var currentIndex = Searcher.Song.IndexOf(Current);
+        var upper = song.Values.Count;
 
-        Logger.Log(LogLevel.Error, nameof(Gramophone), Searcher.Query);
+        song.Index = Searcher.IsSearching ? 0 : currentIndex;
+        song.OnValueChange(song.Index);
+        upper.For(i => song.Values[i] = new(Friendly(i), i)).Enumerate();
+
+        description.Title = DescriptionText
+           .Replace(Localized.SearchTemplate, Searcher.Query)
+           .Replace(Localized.CurrentTemplate, $"{currentIndex + 1}")
+           .Replace(Localized.PercentTemplate, $"{NewValue()}")
+           .Replace(Localized.UpperTemplate, $"{upper + 1}");
 
         var container = description.Container;
-        var i = container.IndexOf(description);
+        var containerIndex = container.IndexOf(description);
 
         container.Remove(description);
-        container.Insert(i, description);
+        container.Insert(containerIndex, description);
     }
 
     static bool IsBanned(this EventInstance? instance) =>

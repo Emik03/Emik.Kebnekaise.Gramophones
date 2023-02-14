@@ -5,7 +5,7 @@ Gramophone_Enable=
 Enabled
 
 Gramophone_Enter=
-Press 'Enter' to enable search mode!
+Press 'Enter' to enable search mode! ((percent)%, (current)/(upper))
 
 Gramophone_Gramo=
 Gramophone
@@ -23,7 +23,7 @@ Gramophone_Params=
 Inhibit parameters
 
 Gramophone_Searching=
-Searching: (search)
+Searching: (search) ((current)/(upper))
 
 Gramophone_Shuffle=
 Sort randomly

@@ -20,8 +20,6 @@ static class Searcher
 
     internal static string Query { get; set; } = "";
 
-    internal static bool IsBanned(this string? path) => path is not null && s_banned.Any(path.Contains);
-
     internal static void Process(char c, Action reload)
     {
         if (!TryInsert(c))
@@ -55,6 +53,10 @@ static class Searcher
 
         sorted.ToList().For((x, i) => s_songs[i] = x);
     }
+
+    internal static bool IsBanned(this string? path) => path is not null && s_banned.Any(path.Contains);
+
+    internal static double Score(string? s) => s.JaroWinkler(Query, s_comparer);
 
     static void Play(string path)
     {
