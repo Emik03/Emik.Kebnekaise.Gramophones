@@ -5,7 +5,7 @@ Gramophone_Enable=
 Enabled
 
 Gramophone_Enter=
-Press 'Enter' to enable search mode! (search)
+Press 'Enter' to enable search mode!
 
 Gramophone_Gramo=
 Gramophone
