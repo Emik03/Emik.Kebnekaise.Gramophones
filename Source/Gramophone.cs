@@ -4,7 +4,7 @@ namespace Emik.Kebnekaise.Gramophones;
 
 static class Gramophone
 {
-    public const int MaxLength = 30;
+    public const int MaxLength = 25;
 
     static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
 
