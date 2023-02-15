@@ -8,6 +8,8 @@ static class Gramophone
 
     static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
 
+    static bool s_hasInit;
+
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
     static IList<Item>? s_items;
 
@@ -45,6 +47,9 @@ static class Gramophone
         {
             if (level is null || menu is null)
                 return;
+
+            if (!s_hasInit && (s_hasInit = true))
+                Play(Audio.CurrentMusic);
 
             menu.RemoveSelf();
             var i = menu.IndexOf(button);
@@ -247,7 +252,7 @@ static class Gramophone
 
     static Slider MakeSlider()
     {
-        int index = Searcher.Song.IndexOf(Current) is var i && i is -1 ? 0 : i,
+        int index = Searcher.Song.IndexOf(Current) is var i && i is -1 ? Searcher.Song.IndexOf(Audio.CurrentMusic) : i,
             upper = Searcher.Song.Count - 1;
 
         return new(Localized.Song, Friendly, 0, upper, index);
