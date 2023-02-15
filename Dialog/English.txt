@@ -23,7 +23,7 @@ Gramophone_Params=
 Inhibit parameters
 
 Gramophone_Searching=
-Searching within (U) songs: (S) ((P)% accuracy)
+Searching within (U) songs: "(S)" ((P)% accuracy)
 
 Gramophone_Shuffle=
 Sort randomly

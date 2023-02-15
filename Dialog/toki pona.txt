@@ -23,7 +23,7 @@ Gramophone_Params=
 musi ken ante e nanpa
 
 Gramophone_Searching=
-o lukin lon musi kalama (U) e ni: (S) ((P)%)
+o lukin lon musi kalama (U) e ni: "(S)" ((P)%)
 
 Gramophone_Shuffle=
 o pali nasa e nanpa
