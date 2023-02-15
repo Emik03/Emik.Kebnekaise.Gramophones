@@ -132,10 +132,11 @@ static class Searcher
             if (Please.Try(Audio.GetEventDescription, x).Ok is not { } description)
                 return false;
 
-            if (description.getLength(out var milliseconds) is not RESULT.OK || milliseconds < MinimumAudioLength)
-                return false;
+            if (description.getLength(out var milliseconds) is RESULT.OK &&
+                milliseconds >= MinimumAudioLength)
+                return true;
 
-            return description.getParameterCount(out var count) is RESULT.OK && count is not 0;
+            return description.getParameterCount(out var count) is RESULT.OK && count > 0;
         }
 
         static bool HasSongGuids(ZipEntry x) => x.FileName.EndsWith(".guids.txt");
