@@ -247,7 +247,7 @@ static class Gramophone
 
     static Slider MakeSlider()
     {
-        int index = Searcher.Song.IndexOf(Current),
+        int index = Searcher.Song.IndexOf(Current) is var i && i is -1 ? 0 : i,
             upper = Searcher.Song.Count - 1;
 
         return new(Localized.Song, Friendly, 0, upper, index);
