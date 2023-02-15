@@ -1,5 +1,5 @@
 - Name: Gramophone
-  Version: 1.0.0
+  Version: 1.0.2
   DLL: "Code/Emik.Kebnekaise.Gramophones/bin/net452/Emik.Kebnekaise.Gramophones.dll"
   Dependencies:
     - Name: Everest
