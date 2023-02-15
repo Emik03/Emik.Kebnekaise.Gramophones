@@ -132,8 +132,7 @@ static class Searcher
             if (Please.Try(Audio.GetEventDescription, x).Ok is not { } description)
                 return false;
 
-            if (description.getLength(out var milliseconds) is RESULT.OK &&
-                milliseconds >= MinimumAudioLength)
+            if (description.getLength(out var milliseconds) is RESULT.OK && milliseconds >= MinimumAudioLength)
                 return true;
 
             return description.getParameterCount(out var count) is RESULT.OK && count > 0;
