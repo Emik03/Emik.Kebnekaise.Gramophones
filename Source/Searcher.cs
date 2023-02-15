@@ -113,14 +113,25 @@ static class Searcher
 
     static IEnumerable<string?> Songs()
     {
-        static void Finish(List<string> list) => list.For(x => Logger.Log(nameof(Gramophone), x));
+        static void Finish(List<string> list)
+        {
+            list.For(x => Logger.Log(nameof(Gramophone), x));
+
+            if (Audio.CurrentMusic != s_previous)
+                Audio.SetMusic(s_previous);
+        }
 
         static bool Desired(string x) => x.StartsWith("event:/") && !s_banned.Any(x.Contains);
 
         static bool HasParams(string x)
         {
+            const int MinimumAudioLength = 15 * 1000;
+
             s_previous ??= Audio.CurrentMusic;
-            return Please.Try(Audio.GetEventDescription, x).Ok is not null;
+
+            return Please.Try(Audio.GetEventDescription, x).Ok is { } description &&
+                description.getLength(out var milliseconds) is RESULT.OK &&
+                milliseconds >= MinimumAudioLength;
         }
 
         static bool HasSongGuids(ZipEntry x) => x.FileName.EndsWith(".guids.txt");
