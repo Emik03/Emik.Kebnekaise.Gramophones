@@ -33,7 +33,7 @@ static class Searcher
             return;
 
         s_songs
-           .OrderByDescending(x => Gramophone.MakeFriendly(x).JaroWinkler(Query, s_comparer))
+           .OrderByDescending(x => Gramophone.MakeFriendly(x).Then(Score))
            .ThenBy(Self, StringComparer.OrdinalIgnoreCase)
            .ToList()
            .For((x, i) => s_songs[i] = x);
