@@ -22,7 +22,7 @@ public sealed class GramophoneModule : EverestModule
     [Command("gramophone_change", "[Gramophone] Change a parameter in the song")]
     public static void Change(string? param, string? value) => Gramophone.SetParam(param, value);
 
-    [Command("gramophone_inhibit", "[Gramophone] Toggles if the map is allowed to change song parameter values")]
+    [Command("gramophone_trigger", "[Gramophone] Toggles if the map is allowed to change song parameter values")]
     public static void Inhibit() => Gramophone.Inhibit();
 
     [Command("gramophone_stop", "[Gramophone] Stop a song")]
@@ -34,6 +34,7 @@ public sealed class GramophoneModule : EverestModule
 
         new[]
         {
+            (Item)new SubHeader(Gramophone.Previous),
             new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
             new OnOff(Localized.Menu, Settings.Menu).Change(x => Settings.Menu = x),
             new OnOff(Localized.Params, Settings.Inhibit).Change(Gramophone.Inhibit),
