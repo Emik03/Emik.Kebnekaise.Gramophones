@@ -18,7 +18,7 @@ static class Gramophone
     static IList<ParameterInstance>? s_parameters;
 
     internal static SubHeader Fallback =>
-        new(MakeFriendly(Localized.Previous.Key.Replace(Localized.SearchTemplate, Previous)), false);
+        new(MakeFriendly(((string)Localized.Previous).Replace(Localized.SearchTemplate, Previous)), false);
 
     internal static bool IsPlaying { get; set; }
 
