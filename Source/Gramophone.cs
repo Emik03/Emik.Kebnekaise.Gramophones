@@ -204,6 +204,10 @@ static class Gramophone
             return;
 
         var currentIndex = Searcher.Song.IndexOf(Current);
+
+        if (currentIndex is -1)
+            return;
+
         var upper = song.Values.Count;
 
         song.Index = Searcher.IsSearching ? 0 : currentIndex;
@@ -217,6 +221,9 @@ static class Gramophone
 
         var container = description.Container;
         var containerIndex = container.IndexOf(description);
+
+        if (containerIndex is -1)
+            return;
 
         container.Remove(description);
         container.Insert(containerIndex, description);
