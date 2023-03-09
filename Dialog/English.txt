@@ -20,7 +20,7 @@ Gramophone_None=
 None
 
 Gramophone_Params=
-Inhibit parameters
+Use parameter triggers
 
 Gramophone_Searching=
 Searching within (U) songs: "(S)" ((P)% accuracy)
