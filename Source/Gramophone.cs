@@ -143,6 +143,7 @@ static class Gramophone
         {
             new Header(Localized.Gramo),
             new SubHeader(Localized.Which),
+            new SubHeader(MakeFriendly(Previous), false),
             new Button(Localized.Stop).Pressed(Stop),
             new Button(Localized.Ambience).Pressed(MuteAmbience),
             shuffle,
