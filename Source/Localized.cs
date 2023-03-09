@@ -25,6 +25,8 @@ static class Localized
 
     internal static LocalString Params { get; } = new(nameof(Params));
 
+    internal static LocalString Previous { get; } = new(nameof(Previous));
+
     internal static LocalString Searching { get; } = new(nameof(Searching));
 
     internal static LocalString Shuffle { get; } = new(nameof(Shuffle));

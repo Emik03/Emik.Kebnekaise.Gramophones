@@ -17,6 +17,9 @@ static class Gramophone
 
     static IList<ParameterInstance>? s_parameters;
 
+    internal static SubHeader Fallback =>
+        new(MakeFriendly(Localized.Previous.Key.Replace(Localized.SearchTemplate, Previous)), false);
+
     internal static bool IsPlaying { get; set; }
 
     internal static string? Previous { get; set; }
@@ -143,7 +146,7 @@ static class Gramophone
         {
             new Header(Localized.Gramo),
             new SubHeader(Localized.Which),
-            new SubHeader(MakeFriendly(Previous), false),
+            Fallback,
             new Button(Localized.Stop).Pressed(Stop),
             new Button(Localized.Ambience).Pressed(MuteAmbience),
             shuffle,
@@ -253,7 +256,9 @@ static class Gramophone
 
     static Slider MakeSlider()
     {
-        int index = Searcher.Song.IndexOf(Current) is var i && i is -1 ? Searcher.Song.IndexOf(Audio.CurrentMusic) : i,
+        int index = Searcher.Song.IndexOf(Current) is var i && i is -1
+                ? Searcher.Song.IndexOf(Audio.CurrentMusic) is var j && j is -1 ? 1 : j
+                : i,
             upper = Searcher.Song.Count - 1;
 
         return new(Localized.Song, Friendly, 0, upper, index);

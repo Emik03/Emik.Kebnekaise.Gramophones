@@ -22,6 +22,9 @@ None
 Gramophone_Params=
 Use parameter triggers
 
+Gramophone_Previous=
+Current default track: "(S)"
+
 Gramophone_Searching=
 Searching within (U) songs: "(S)" ((P)% accuracy)
 
