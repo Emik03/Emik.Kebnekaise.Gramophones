@@ -66,6 +66,10 @@ static class Searcher
         Audio.Play(path);
     }
 
+    static bool HasSongGuids(ZipEntry x) => HasSongGuids(x.FileName);
+
+    static bool HasSongGuids(string x) => x.EndsWith(".guids.txt", StringComparison.InvariantCultureIgnoreCase);
+
     static bool TryInsert(char c)
     {
         const char
@@ -138,8 +142,6 @@ static class Searcher
             return description.getParameterCount(out var count) is RESULT.OK && count > 0;
         }
 
-        static bool HasSongGuids(ZipEntry x) => x.FileName.EndsWith(".guids.txt");
-
         static IEnumerable<string> Read(ZipEntry x)
         {
             using var stream = x.OpenReader();
@@ -149,9 +151,11 @@ static class Searcher
 
         static IEnumerable<string> Local() =>
             Please
-               .Try(Directory.GetFiles, PathMods, "*.guids.txt", SearchOption.AllDirectories)
+               .Try(Directory.GetFiles, PathMods, "*.txt", SearchOption.AllDirectories)
                .SelectMany(Enumerable.AsEnumerable)
-               .SelectMany(x => Please.Try(File.ReadAllText, x));
+               .Where(HasSongGuids)
+               .SelectMany(x => Please.Try(File.ReadAllText, x))
+               .SelectMany(x => x.Split());
 
         static IEnumerable<ZipFile> AllFiles(string? x) => Please.Try(ZipFile.Read, x);
 
