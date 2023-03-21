@@ -8,6 +8,6 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Remove="Emik.SourceGenerators.Tattoo"/>
-        <PackageReference Include="Emik.Results" Version="1.0.4" PrivateAssets="all"/>
+        <PackageReference Include="Emik.Results" Version="1.0.5" PrivateAssets="all"/>
     </ItemGroup>
 </Project>
