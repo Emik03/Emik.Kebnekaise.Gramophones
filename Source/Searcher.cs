@@ -56,7 +56,7 @@ static class Searcher
 
     internal static bool IsBanned(this string? path) => path is not null && s_banned.Any(path.Contains);
 
-    internal static double Score(string? s) => s.Jaro(Query, s_comparer);
+    internal static double Score(string? s) => s.JaroEmik(Query, s_comparer);
 
     static void Play(string path)
     {
