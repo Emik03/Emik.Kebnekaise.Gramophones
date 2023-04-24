@@ -41,7 +41,7 @@ static class Localized
 
     internal static LocalString Which { get; } = new(nameof(Which));
 
-    internal readonly record struct LocalString(string Key)
+    internal record struct LocalString(string Key)
     {
         public static implicit operator string(LocalString localString)
         {
