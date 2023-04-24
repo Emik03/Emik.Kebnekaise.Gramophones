@@ -3,7 +3,7 @@
     <PropertyGroup>
         <FileVersion>1.0.4</FileVersion>
         <TargetFramework>net452</TargetFramework>
-        <DefineConstants>$(DefineConstants);NO_SYSTEM_MEMORY</DefineConstants>
+        <DefineConstants>$(DefineConstants);NO_READONLY_STRUCTS;NO_SYSTEM_MEMORY</DefineConstants>
         <Description>Celeste/Everest Mod that allows you to play any FMOD bank, anywhere.</Description>
     </PropertyGroup>
     <ItemGroup>
