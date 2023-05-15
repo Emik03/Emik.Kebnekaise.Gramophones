@@ -1,13 +1,13 @@
 ﻿<!-- SPDX-License-Identifier: MPL-2.0 -->
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <FileVersion>1.0.4</FileVersion>
-        <TargetFramework>net452</TargetFramework>
-        <DefineConstants>$(DefineConstants);NO_READONLY_STRUCTS;NO_SYSTEM_MEMORY</DefineConstants>
+        <IsCeleste>true</IsCeleste>
+        <FileVersion>2.0</FileVersion>
+        <TargetFramework>net7.0</TargetFramework>
         <Description>Celeste/Everest Mod that allows you to play any FMOD bank, anywhere.</Description>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Remove="Emik.SourceGenerators.Tattoo"/>
-        <PackageReference Include="Emik.Results" Version="1.0.5" PrivateAssets="all"/>
+        <PackageReference Include="Emik.Results" Version="2.0.0" PrivateAssets="all"/>
     </ItemGroup>
 </Project>

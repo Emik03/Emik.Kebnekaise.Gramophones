@@ -175,7 +175,7 @@ static class Gramophone
     {
         const string PauseSnapshot = nameof(PauseSnapshot);
 
-        using var data = new DynData<Level?>(level);
+        using var data = new DynData<Level>(level);
 
         var pause = data.Get<EventInstance>(PauseSnapshot);
         var menu = new TextMenu().AddMenus(pause);
