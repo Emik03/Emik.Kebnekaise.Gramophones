@@ -1,0 +1,47 @@
+Gramophone_Ambience=
+Заглушить звуки окружения
+
+Gramophone_Enable=
+Включен
+
+Gramophone_Enter=
+Нажмите 'Enter' чтобы войти в режим поиска!
+
+Gramophone_Gramo=
+Граммофон
+
+Gramophone_Loading=
+Загрузка...
+
+Gramophone_Menu=
+Показать в меню
+
+Gramophone_None=
+Нет
+
+Gramophone_Params=
+Использовать триггеры параметров
+
+Gramophone_Previous=
+Текущий трек по-умолчанию: "(S)"
+
+Gramophone_Searching=
+Поиск среди (U) треков: "(S)" (точность (P)%)
+
+Gramophone_Shuffle=
+Случайная сортировка
+
+Gramophone_Song=
+Трек
+
+Gramophone_Sort=
+Сортировка по алфавиту
+
+Gramophone_Step=
+Кол-во шагов за единицу FMOD
+
+Gramophone_Stop=
+Стоп
+
+Gramophone_Which=
+Какой трек?
