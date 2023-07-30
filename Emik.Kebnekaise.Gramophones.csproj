@@ -3,7 +3,7 @@
     <PropertyGroup>
         <NoTests>true</NoTests>
         <IsCeleste>true</IsCeleste>
-        <FileVersion>1.0.5</FileVersion>
+        <FileVersion>1.0.6</FileVersion>
         <TargetFrameworks>net452;net7.0</TargetFrameworks>
         <Description>Celeste/Everest Mod that allows you to play any FMOD bank, anywhere.</Description>
     </PropertyGroup>
