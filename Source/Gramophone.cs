@@ -193,8 +193,9 @@ static class Gramophone
         const string PauseSnapshot = nameof(PauseSnapshot);
 
         // ReSharper disable once NullableWarningSuppressionIsUsed
+#pragma warning disable RCS1249
         using var data = new DynData<Level>(level!);
-
+#pragma warning restore RCS1249
         var pause = data.Get<EventInstance>(PauseSnapshot);
         var menu = new TextMenu().AddMenus(pause);
 
