@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3e5203e5-bca1-47e4-b705-866a6a24fe89" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Emik.Kebnekaise.Gramophones.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Emik.Kebnekaise.Gramophones.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Emik.Kebnekaise.Gramophones.csproj.DotSettings" beforeDir="false" afterPath="$PROJECT_DIR$/Emik.Kebnekaise.Gramophones.csproj.DotSettings" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GlobalUsings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/GlobalUsings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Gramophone.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Gramophone.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/GramophoneModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GramophoneModule.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Searcher.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Searcher.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/everest.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/everest.yaml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3ec5f2e713f847f7b405e1fbddf78cb5eb600/07/d1585c5a/RegexOptions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/4a26f9ded6704c87a2f47e66d2d851634b5e00/00/f3a3c777/System.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/4a26f9ded6704c87a2f47e66d2d851634b5e00/77/ec517fb7/Audio.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/4a26f9ded6704c87a2f47e66d2d851634b6600/4b/3f096329/Audio.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/4a26f9ded6704c87a2f47e66d2d851634b6600/7e/da3f5f74/TextMenu.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a49482eaa57f4240b9b6c3e1afa1746e79a600/fe/dfa2c837/Audio.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b40ae51306464c5cb354a70ca5ba220f30400/64/d5dc2429/DynData`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ebc8fe5dd34b4e878e00b2208513f56527a2a0/36/0192a9a3/Boolean.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/66fb396b9859c8734ef8e8dd529955858164ba8a4e32d9085dd3099d5c9127b/List.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/79be7062277a1adcb161b1c08e4c1197d16d19ef83a06e5096d1e14ad7b2f215/MemoryMarshal.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/bd1669d1392f4ba6a95238492a7b3796ae3a00/_268cf/IList.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/f5df9c99eac743572d43408da9b8e44f5fb269d63a64cd769a45f2d28bc84296/Unsafe.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/ffc49ec4f9a5cac5cc59308645b41043ba106d69c073d78a548d95ae4f9615b1/Char.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/GlobalUsings.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Extensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Gramophone.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/GramophoneModule.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/GramophoneSettings.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Localized.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Searcher.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Buffers/Span.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Buffers/SpanQueries.Where.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Buffers/SpanSimdQueries.MinimumMaximum.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Buffers/SplitSpan.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Buffers/Two.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Collections/Generics/ClippedList.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Collections/Generics/Matrix.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Collections/Similarity.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Collections/Specialized/SmallFactory.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Collections/Specialized/SmallList`1.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Diagnostics/Peeks.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/MethodGroupings.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Text/Stringifier.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Emik/Unfolding.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/Fody/RemoveReferenceAttribute.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/System/Collections/Immutable/ImmutableCollectionsMarshal.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/System/Diagnostics/Attributes.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/System/Diagnostics/UnreachableException.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/System/Index.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/System/Runtime/InteropServices/MemoryMarshal.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/System/Runtime/InteropServices/Unsafe.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Emik.Morsels/Compile/Source/References/System/ValueTuple.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file:///mnt/d/Celeste-Mods/Gramophone/Code/Emik.Kebnekaise.Gramophones/GlobalUsings.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file:///mnt/d/Celeste-Mods/Gramophone/Code/Emik.Kebnekaise.Gramophones/Source/GramophoneModule.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file:///mnt/d/Celeste-Mods/Gramophone/Code/Emik.Kebnekaise.Gramophones/Source/Searcher.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="ftrv467k" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2THYARcL2jAInoAn3YLMnHyHHYO" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/home/emik/RiderProjects/Emik/Emik.Kebnekaise.sln",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "preferences.fileTypes",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "rider.external.source.directories": [
+      "/home/emik/.config/JetBrains/Rider2023.2/resharper-host/DecompilerCache",
+      "/home/emik/.config/JetBrains/Rider2023.2/resharper-host/SourcesCache",
+      "/home/emik/.local/share/Symbols/src"
+    ]
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3e5203e5-bca1-47e4-b705-866a6a24fe89" name="Changes" comment="" />
+      <created>1690701329956</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1690701329956</updated>
+      <workItem from="1690701330947" duration="5799000" />
+      <workItem from="1690708245952" duration="11671000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="V Toolchain" url="$USER_HOME$/v" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+</project>
