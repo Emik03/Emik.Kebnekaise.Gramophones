@@ -3,12 +3,12 @@
     <PropertyGroup>
         <NoTests>true</NoTests>
         <IsCeleste>true</IsCeleste>
-        <FileVersion>1.0.6</FileVersion>
+        <FileVersion>1.1</FileVersion>
         <TargetFrameworks>net452;net7.0</TargetFrameworks>
         <Description>Celeste/Everest Mod that allows you to play any FMOD bank, anywhere.</Description>
     </PropertyGroup>
     <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard1.3'))">
-        <FileVersion>2.0.2</FileVersion>
+        <FileVersion>2.1</FileVersion>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Remove="Emik.SourceGenerators.Tattoo"/>
