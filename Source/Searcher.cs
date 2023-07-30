@@ -6,8 +6,6 @@ static class Searcher
 {
     static readonly string[] s_banned = { "char", "env", "game", "menu", "sound", "sfx", "ui" };
 
-    static readonly CaseInsensitiveCharComparer s_comparer = new();
-
     static string? s_previous;
 
     static IList<string?>? s_songs;
@@ -56,7 +54,7 @@ static class Searcher
 
     internal static bool IsBanned(this string? path) => path is not null && s_banned.Any(path.Contains);
 
-    internal static double Score(string? s) => s.JaroEmik(Query, s_comparer);
+    internal static double Score(string? s) => s.JaroEmik(Query, CharComparer.Default);
 
     static void Play(string path)
     {
@@ -115,11 +113,13 @@ static class Searcher
     // ReSharper disable once UnusedMethodReturnValue.Local
     static string Backspace(this string sb) => sb.Length is 0 ? sb : sb[..^1];
 
+#pragma warning disable CA1859
     static IEnumerable<string?> Songs()
+#pragma warning restore CA1859
     {
         static void Finish(List<string> list)
         {
-            list.For(x => Logger.Log(nameof(Gramophone), x));
+            list.ForEach(x => Logger.Log(nameof(Gramophone), x));
 
             if (Audio.CurrentMusic != s_previous)
                 Audio.SetMusic(s_previous);
@@ -133,7 +133,7 @@ static class Searcher
 
             s_previous ??= Audio.CurrentMusic;
 
-            if (Please.Try(Audio.GetEventDescription, x).Ok is not { } description)
+            if (Audio.System.getEvent(x, out var description) is not RESULT.OK)
                 return false;
 
             if (description.getLength(out var milliseconds) is RESULT.OK && milliseconds >= MinimumAudioLength)
@@ -169,17 +169,20 @@ static class Searcher
            .SelectMany(Read)
            .Concat(Local())
            .Where(Desired)
-           .Where(HasParams)
            .Distinct(StringComparer.OrdinalIgnoreCase)
+           .Where(HasParams)
            .OrderBy(Self, StringComparer.OrdinalIgnoreCase)
            .ToList()
            .Peek(Finish);
     }
 
-    sealed class CaseInsensitiveCharComparer : IEqualityComparer<char>
+    sealed class CharComparer : IEqualityComparer<char>
     {
+        /// <summary>Gets the comparer.</summary>
+        public static CharComparer Default { get; } = new();
+
         /// <inheritdoc />
-        public bool Equals(char x, char y) => x.ToUpper() == y.ToUpper();
+        public bool Equals(char x, char y) => x.IsWhitespace() == y.IsWhitespace() || x.ToUpper() == y.ToUpper();
 
         /// <inheritdoc />
         public int GetHashCode(char obj) => obj.ToUpper();
