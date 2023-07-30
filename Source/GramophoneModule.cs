@@ -43,13 +43,12 @@ public sealed class GramophoneModule : EverestModule
 
     public override void Load()
     {
-        Gramophone.Previous = Audio.CurrentMusic;
-
         AudioState.Apply += Gramophone.Apply;
-        Everest.Events.Level.OnCreatePauseMenuButtons += Gramophone.Pause;
         OnAudio.SetMusic += Gramophone.SetMusic;
-        OnAudio.SetMusicParam += Gramophone.SetMusicParam;
+        OnAudio.SetAltMusic += Gramophone.SetAltMusic;
         OnAudio.SetParameter += Gramophone.SetParameter;
+        OnAudio.SetMusicParam += Gramophone.SetMusicParam;
+        Everest.Events.Level.OnCreatePauseMenuButtons += Gramophone.Pause;
     }
 
     public override void Unload()
@@ -57,9 +56,10 @@ public sealed class GramophoneModule : EverestModule
         Gramophone.Stop();
 
         AudioState.Apply -= Gramophone.Apply;
-        Everest.Events.Level.OnCreatePauseMenuButtons -= Gramophone.Pause;
         OnAudio.SetMusic -= Gramophone.SetMusic;
-        OnAudio.SetMusicParam -= Gramophone.SetMusicParam;
+        OnAudio.SetAltMusic -= Gramophone.SetAltMusic;
         OnAudio.SetParameter -= Gramophone.SetParameter;
+        OnAudio.SetMusicParam -= Gramophone.SetMusicParam;
+        Everest.Events.Level.OnCreatePauseMenuButtons -= Gramophone.Pause;
     }
 }
