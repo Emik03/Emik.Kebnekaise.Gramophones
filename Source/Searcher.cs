@@ -96,8 +96,8 @@ static class Searcher
                 (Query.Length is not 0).Then(Play)?.Invoke(Delete);
                 Query = Query.Backspace();
                 break;
-            case var _ when !c.IsControl() &&
-                IsSearching &&
+            case var _ when IsSearching &&
+                !c.IsControl() &&
                 !(c.IsWhitespace() && Query.Length is 0) &&
                 Query.Length < Gramophone.MaxLength:
                 Query += c;
@@ -132,7 +132,6 @@ static class Searcher
         Audio.cachedEventDescriptions.Add(path, ret);
         return ret;
     }
-
 #pragma warning disable CA1859
     static IEnumerable<string?> Songs()
 #pragma warning restore CA1859
@@ -202,9 +201,9 @@ static class Searcher
         public static CharComparer Default { get; } = new();
 
         /// <inheritdoc />
-        public bool Equals(char x, char y) => x.IsWhitespace() == y.IsWhitespace() || x.ToUpper() == y.ToUpper();
+        public bool Equals(char x, char y) => x.IsWhitespace() && y.IsWhitespace() || x.ToUpper() == y.ToUpper();
 
         /// <inheritdoc />
-        public int GetHashCode(char obj) => obj.ToUpper();
+        public int GetHashCode(char obj) => obj.IsWhitespace() ? '\t' : obj.ToUpper();
     }
 }
