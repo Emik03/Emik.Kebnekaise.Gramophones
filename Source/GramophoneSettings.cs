@@ -17,6 +17,10 @@ public sealed class GramophoneSettings : EverestModuleSettings
     [SettingIgnore]
     public bool Inhibit { get; set; } = true;
 
+    /// <summary>Gets or sets a value indicating whether music is played through the alternative channel.</summary>
+    [SettingIgnore]
+    public bool Alt { get; set; }
+
     /// <summary>Gets or sets a value how many steps are equivalent to 1 in FMOD.</summary>
     [SettingIgnore, ValueRange(1, int.MaxValue)]
     public int Step { get; set; } = 1;

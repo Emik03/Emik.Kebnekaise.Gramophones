@@ -41,6 +41,14 @@ static class Gramophone
 
     internal static void MuteAmbience() => Audio.SetAmbience("");
 
+    internal static void UseAlt() => UseAlt(GramophoneModule.Settings.Alt);
+
+    internal static void UseAlt(bool x)
+    {
+        GramophoneModule.Settings.Alt = x;
+        Play(Audio.CurrentMusic);
+    }
+
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
         Button button = new(Localized.Gramo);
@@ -156,6 +164,7 @@ static class Gramophone
             Fallback,
             new Button(Localized.Stop).Pressed(Stop),
             new Button(Localized.Ambience).Pressed(MuteAmbience),
+            new OnOff(Localized.Alt, GramophoneModule.Settings.Alt).Change(UseAlt),
             shuffle,
             new OnOff(Localized.Params, GramophoneModule.Settings.Inhibit).Change(Inhibit),
             step,
@@ -172,8 +181,11 @@ static class Gramophone
         if (AudioSession is not { } audio)
             return;
 
-        Audio.SetAltMusic(path); // Cassette-based music.
-        Audio.SetMusic(path); // Everything else.
+        if (GramophoneModule.Settings.Alt)
+            Audio.SetAltMusic(path);
+        else
+            Audio.SetMusic(path);
+
         IsPlaying = isPlaying;
         audio.Music.Event = path;
         audio.Apply();
@@ -333,7 +345,6 @@ static class Gramophone
         }
 
         menu.AddItems(song.Change(Change).Enter(EnterSong).Leave(LeaveSong), description, Update);
-
         return menu;
     }
 }

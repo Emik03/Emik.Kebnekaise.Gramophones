@@ -1,3 +1,6 @@
+Gramophone_Alt=
+o ante e ilo kalama (pini poka-E anu ale ante)
+
 Gramophone_Ambience=
 o weka e kalama kon
 

@@ -28,6 +28,9 @@ public sealed class GramophoneModule : EverestModule
     [Command("gramophone_stop", "[Gramophone] Stop a song")]
     public static void Stop() => Gramophone.Stop();
 
+    [Command("gramophone_alternate", "[Gramophone] Toggles whether to play through the main or cassette channel.")]
+    public static void UseAlt() => Gramophone.UseAlt();
+
     public override void CreateModMenuSection(TextMenu? menu, bool inGame, EventInstance? snapshot)
     {
         base.CreateModMenuSection(menu, inGame, snapshot);
@@ -37,6 +40,7 @@ public sealed class GramophoneModule : EverestModule
             (Item)Gramophone.Fallback,
             new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
             new OnOff(Localized.Menu, Settings.Menu).Change(x => Settings.Menu = x),
+            new OnOff(Localized.Alt, Settings.Alt).Change(x => Settings.Alt = x),
             new OnOff(Localized.Params, Settings.Inhibit).Change(Gramophone.Inhibit),
         }.For(x => menu?.Add(x));
     }

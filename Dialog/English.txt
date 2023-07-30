@@ -1,3 +1,6 @@
+Gramophone_Alt=
+Toggle Music Channel (Main/Cassette)
+
 Gramophone_Ambience=
 Mute Ambience
 

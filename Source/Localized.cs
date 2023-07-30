@@ -9,6 +9,8 @@ static class Localized
         SearchTemplate = "(S)",
         UpperTemplate = "(U)";
 
+    internal static LocalString Alt { get; } = new(nameof(Alt));
+
     internal static LocalString Ambience { get; } = new(nameof(Ambience));
 
     internal static LocalString Enable { get; } = new(nameof(Enable));
