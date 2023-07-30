@@ -108,10 +108,30 @@ static class Searcher
         return IsSearching;
     }
 
+    static string Backspace(this string x) => x is "" ? x : x[..^1];
+
     static string? Self(string? x) => x;
 
-    // ReSharper disable once UnusedMethodReturnValue.Local
-    static string Backspace(this string sb) => sb.Length is 0 ? sb : sb[..^1];
+    static EventDescription? GetEventDescription(string? path)
+    {
+        // Reimplementation of [Celeste]GetEventDescription, except it doesn't log when the event doesn't exist.
+        const string Prefix = "guid://";
+        EventDescription? ret = null;
+
+        if (path is null || Audio.cachedEventDescriptions.TryGetValue(path, out ret))
+            return ret;
+
+        var result = Audio.cachedModEvents.TryGetValue(path, out ret) ? RESULT.OK :
+            path.StartsWith(Prefix) ? Audio.System.getEventByID(new(path[Prefix.Length..]), out ret) :
+            Audio.System.getEvent(path, out ret);
+
+        if (result is not RESULT.OK)
+            return ret;
+
+        _ = ret.loadSampleData(); // I have no idea if this method is pure or not, but I call it anyway.
+        Audio.cachedEventDescriptions.Add(path, ret);
+        return ret;
+    }
 
 #pragma warning disable CA1859
     static IEnumerable<string?> Songs()
@@ -133,7 +153,7 @@ static class Searcher
 
             s_previous ??= Audio.CurrentMusic;
 
-            if (Audio.System.getEvent(x, out var description) is not RESULT.OK)
+            if (GetEventDescription(x) is not { } description)
                 return false;
 
             if (description.getLength(out var milliseconds) is RESULT.OK && milliseconds >= MinimumAudioLength)
