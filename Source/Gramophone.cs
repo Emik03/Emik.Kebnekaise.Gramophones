@@ -39,7 +39,7 @@ static class Gramophone
 
     internal static void Inhibit(bool x) => GramophoneModule.Settings.Inhibit = x;
 
-    internal static void MuteAmbience() => Audio.CurrentAmbienceEventInstance?.stop(STOP_MODE.ALLOWFADEOUT);
+    internal static void MuteAmbience() => Audio.SetAmbience("");
 
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
@@ -112,6 +112,13 @@ static class Gramophone
 
     internal static void Stop() => Set(Previous, false);
 
+    internal static void SetAltMusic(OnAudio.orig_SetAltMusic? orig, string? path)
+    {
+        _ = Searcher.Song;
+        Previous = path;
+        (!IsPlaying).Then(orig)?.Invoke(path);
+    }
+
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
         _ = Searcher.Song;
@@ -165,7 +172,8 @@ static class Gramophone
         if (AudioSession is not { } audio)
             return;
 
-        Audio.SetMusic(path);
+        Audio.SetAltMusic(path); // Cassette-based music.
+        Audio.SetMusic(path); // Everything else.
         IsPlaying = isPlaying;
         audio.Music.Event = path;
         audio.Apply();
@@ -175,7 +183,8 @@ static class Gramophone
     {
         const string PauseSnapshot = nameof(PauseSnapshot);
 
-        using var data = new DynData<Level>(level);
+        // ReSharper disable once NullableWarningSuppressionIsUsed
+        using var data = new DynData<Level>(level!);
 
         var pause = data.Get<EventInstance>(PauseSnapshot);
         var menu = new TextMenu().AddMenus(pause);
@@ -255,9 +264,9 @@ static class Gramophone
            .Reverse()
            .SelectMany(x => x is '/' ? !seenSlash && (seenSlash = true) ? "\n" : " > " : $"{x}")
            .Reverse()
-           .Conjoin()
+           .Concat()
            .Split('\n')
-           .Select(x => x.Length <= MaxLength ? x : x.Reverse().Take(MaxLength).Append('\u2026').Reverse().Conjoin())
+           .Select(x => x.Length <= MaxLength ? x : x.Reverse().Take(MaxLength).Append('\u2026').Reverse().Concat())
            .Conjoin('\n');
     }
 
