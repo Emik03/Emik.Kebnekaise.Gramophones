@@ -181,11 +181,8 @@ static class Gramophone
         if (AudioSession is not { } audio)
             return;
 
-        if (GramophoneModule.Settings.Alt)
-            Audio.SetAltMusic(path);
-        else
-            Audio.SetMusic(path);
-
+        Audio.SetAltMusic(GramophoneModule.Settings.Alt ? path : "");
+        Audio.SetMusic(GramophoneModule.Settings.Alt ? "" : path);
         IsPlaying = isPlaying;
         audio.Music.Event = path;
         audio.Apply();
