@@ -22,6 +22,8 @@ static class Gramophone
 
     internal static bool IsPlaying { get; set; }
 
+    internal static bool? IsPaused => Audio.CurrentAmbienceEventInstance.getPaused(out var x) is RESULT.OK ? x : null;
+
     internal static string? Previous { get; set; }
 
     internal static string? Current { get; set; }
@@ -35,19 +37,25 @@ static class Gramophone
     internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self) =>
         (!IsPlaying).Then(orig)?.Invoke(self);
 
+    internal static void Ambience() => Ambience(!IsPaused ?? true);
+
+    internal static void Ambience(bool x)
+    {
+        Audio.CurrentAmbienceEventInstance.setPaused(x);
+
+        if (x)
+            Audio.CurrentAmbienceEventInstance.stop(STOP_MODE.ALLOWFADEOUT);
+        else
+            Audio.CurrentAmbienceEventInstance.start();
+    }
+
     internal static void Inhibit() => Inhibit(!GramophoneModule.Settings.Inhibit);
 
     internal static void Inhibit(bool x) => GramophoneModule.Settings.Inhibit = x;
 
-    internal static void MuteAmbience() => Audio.SetAmbience("");
+    internal static void UseAlt() => UseAlt(!GramophoneModule.Settings.Alt);
 
-    internal static void UseAlt() => UseAlt(GramophoneModule.Settings.Alt);
-
-    internal static void UseAlt(bool x)
-    {
-        GramophoneModule.Settings.Alt = x;
-        Play(Audio.CurrentMusic);
-    }
+    internal static void UseAlt(bool x) => GramophoneModule.Settings.Alt = x;
 
     internal static void Pause(Level? level, TextMenu? menu, bool minimal)
     {
@@ -88,17 +96,14 @@ static class Gramophone
            .ToList();
     }
 
+    internal static void SetAltMusic(OnAudio.orig_SetAltMusic? orig, string? path)
+    {
+        GramophoneModule.Settings.Alt.Then(() => SetPrevious(path));
+        (!GramophoneModule.Settings.Alt || !IsPlaying).Then(orig)?.Invoke(path);
+    }
+
     internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value) =>
         (GramophoneModule.Settings.Inhibit || !IsPlaying || path.IsBanned()).Then(orig)?.Invoke(path, value);
-
-    internal static void SetParameter(
-        OnAudio.orig_SetParameter orig,
-        EventInstance instance,
-        string param,
-        float value
-    ) =>
-        (GramophoneModule.Settings.Inhibit || !IsPlaying || instance.IsBanned()).Then(orig)
-      ?.Invoke(instance, param, value);
 
     internal static void SetParam(string? param, string? value)
     {
@@ -118,21 +123,22 @@ static class Gramophone
            .For(x => x.setValue(v));
     }
 
-    internal static void Stop() => Set(Previous, false);
-
-    internal static void SetAltMusic(OnAudio.orig_SetAltMusic? orig, string? path)
-    {
-        _ = Searcher.Song;
-        Previous = path;
-        (!IsPlaying || GramophoneModule.Settings.Alt).Then(orig)?.Invoke(path);
-    }
+    internal static void SetParameter(
+        OnAudio.orig_SetParameter orig,
+        EventInstance instance,
+        string param,
+        float value
+    ) =>
+        (GramophoneModule.Settings.Inhibit || !IsPlaying || instance.IsBanned()).Then(orig)
+      ?.Invoke(instance, param, value);
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
-        _ = Searcher.Song;
-        Previous = path;
+        SetPrevious(path);
         return !IsPlaying && (orig?.Invoke(path, startPlaying, allowFadeOut) ?? false);
     }
+
+    internal static void Stop() => Set(Previous, false);
 
     static void AddItems(this TextMenu menu, Item song, Item description, Action onChange)
     {
@@ -163,8 +169,8 @@ static class Gramophone
             new SubHeader(Localized.Which),
             Fallback,
             new Button(Localized.Stop).Pressed(Stop),
-            new Button(Localized.Ambience).Pressed(MuteAmbience),
             shuffle,
+            new OnOff(Localized.Ambience, IsPaused ?? false).Pressed(Ambience),
             new OnOff(Localized.Params, GramophoneModule.Settings.Inhibit).Change(Inhibit),
             new OnOff(Localized.Alt, GramophoneModule.Settings.Alt).Change(UseAlt),
             step,
@@ -176,16 +182,33 @@ static class Gramophone
         s_items.Select(menu.Add).Enumerate();
     }
 
+    static void EnsureMusicRestarts(string? path)
+    {
+        Audio.SetMusic("");
+        Audio.SetMusic(path);
+        Audio.SetAltMusic("");
+        Audio.SetAltMusic(path);
+    }
+
     static void Set(string? path, bool isPlaying)
     {
         if (AudioSession is not { } audio)
             return;
 
-        Audio.SetMusic(path);
-        GramophoneModule.Settings.Alt.Then(() => Audio.SetAltMusic(path));
-        IsPlaying = isPlaying;
+        if (GramophoneModule.Settings.Alt)
+            EnsureMusicRestarts(path);
+        else
+            Audio.SetMusic(path);
+
         audio.Music.Event = path;
         audio.Apply();
+        IsPlaying = isPlaying;
+    }
+
+    static void SetPrevious(string? path)
+    {
+        _ = Searcher.Song;
+        Previous = path;
     }
 
     static void Screen(this Level? level, int returnIndex, bool minimal)

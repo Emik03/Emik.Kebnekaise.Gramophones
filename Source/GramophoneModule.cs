@@ -13,8 +13,8 @@ public sealed class GramophoneModule : EverestModule
 
     public override Type SettingsType => typeof(GramophoneSettings);
 
-    [Command("gramophone_ambience", "[Gramophone] Mutes the ambience")]
-    public static void Ambience() => Gramophone.MuteAmbience();
+    [Command("gramophone_ambience", "[Gramophone] Toggles the ambience")]
+    public static void Ambience() => Gramophone.Ambience();
 
     [Command("gramophone_play", "[Gramophone] Play a song")]
     public static void Play(string? song) => Gramophone.Play(song);
@@ -40,6 +40,7 @@ public sealed class GramophoneModule : EverestModule
             (Item)Gramophone.Fallback,
             new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
             new OnOff(Localized.Menu, Settings.Menu).Change(x => Settings.Menu = x),
+            new OnOff(Localized.Ambience, Gramophone.IsPaused ?? false).Change(Gramophone.Ambience),
             new OnOff(Localized.Params, Settings.Inhibit).Change(Gramophone.Inhibit),
             new OnOff(Localized.Alt, Settings.Alt).Change(Gramophone.UseAlt),
         }.For(x => menu?.Add(x));
