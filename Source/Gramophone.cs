@@ -6,6 +6,11 @@ static class Gramophone
 {
     public const int MaxLength = 25;
 
+    static readonly Action s_endSnapshot = (Action)Delegate.CreateDelegate(
+        typeof(Action), // ReSharper disable once NullableWarningSuppressionIsUsed
+        typeof(Audio).GetMethod("EndMainDownSnapshot", BindingFlags.Static | BindingFlags.NonPublic)!
+    );
+
     static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
 
     static bool s_hasInit;
@@ -113,11 +118,11 @@ static class Gramophone
 
     internal static void SetParam(string? param, string? value)
     {
-        _ = float.TryParse(value, out var v);
+        _ = float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var v);
         SetParam(param, v);
     }
 
-    internal static void SetParam(string? param, float value)
+    internal static void SetParam(string? param, float value, EventInstance? instance = null)
     {
         static double Score(string? param, ParameterInstance x)
         {
@@ -125,16 +130,20 @@ static class Gramophone
             return param.JaroEmik(d.name);
         }
 
-        s_parameters?.MaxBy(x => Score(param, x))?.setValue(value);
+        (instance ?? Audio.CurrentMusicEventInstance)
+           .Parameters()
+           .Where(x => x.Name() is not "fade")
+           .MaxBy(x => Score(param, x))
+          ?.setValue(value);
     }
 
     internal static void SetParameter(OnAudio.orig_SetParameter orig, EventInstance instance, string param, float value)
     {
-        if (!IsPlaying || instance.IsBanned() || instance != Audio.CurrentMusicEventInstance)
+        if (!IsPlaying || instance.IsBanned())
             orig(instance, param, value);
 
         if (GramophoneModule.Settings.Inhibit)
-            SetParam(param, value);
+            SetParam(param, value, instance);
     }
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
@@ -187,23 +196,22 @@ static class Gramophone
         s_items.Select(menu.Add).Enumerate();
     }
 
-    static void EnsureMusicRestarts(string? path)
-    {
-        Audio.SetMusic("");
-        Audio.SetMusic(path);
-        Audio.SetAltMusic("");
-        Audio.SetAltMusic(path);
-    }
-
     static void Set(string? path, bool isPlaying)
     {
         if (AudioSession is not { } audio)
             return;
 
         if (GramophoneModule.Settings.Alt)
-            EnsureMusicRestarts(path);
+        {
+            Audio.SetMusic("");
+            Audio.SetAltMusic(path);
+        }
         else
+        {
+            Audio.SetAltMusic("");
             Audio.SetMusic(path);
+            s_endSnapshot();
+        }
 
         audio.Music.Event = path;
         audio.Apply();
