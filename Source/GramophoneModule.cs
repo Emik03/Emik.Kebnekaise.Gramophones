@@ -41,7 +41,7 @@ public sealed class GramophoneModule : EverestModule
             new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
             new OnOff(Localized.Menu, Settings.Menu).Change(x => Settings.Menu = x),
             new OnOff(Localized.Params, Settings.Inhibit).Change(Gramophone.Inhibit),
-            new OnOff(Localized.Alt, Settings.Alt).Pressed(Gramophone.UseAlt),
+            new OnOff(Localized.Alt, Settings.Alt).Change(Gramophone.UseAlt),
         }.For(x => menu?.Add(x));
     }
 
