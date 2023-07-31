@@ -102,35 +102,40 @@ static class Gramophone
         (!GramophoneModule.Settings.Alt || !IsPlaying).Then(orig)?.Invoke(path);
     }
 
-    internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value) =>
-        (GramophoneModule.Settings.Inhibit || !IsPlaying || path.IsBanned()).Then(orig)?.Invoke(path, value);
+    internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value)
+    {
+        if (!IsPlaying || path.IsBanned())
+            orig?.Invoke(path, value);
+
+        if (GramophoneModule.Settings.Inhibit)
+            SetParam(path, value);
+    }
 
     internal static void SetParam(string? param, string? value)
     {
-        if (param is null)
-            return;
-
         _ = float.TryParse(value, out var v);
-
-        s_parameters
-          ?.Where(
-                x =>
-                {
-                    x.getDescription(out var d);
-                    return param.Equals(d.name);
-                }
-            )
-           .For(x => x.setValue(v));
+        SetParam(param, v);
     }
 
-    internal static void SetParameter(
-        OnAudio.orig_SetParameter orig,
-        EventInstance instance,
-        string param,
-        float value
-    ) =>
-        (GramophoneModule.Settings.Inhibit || !IsPlaying || instance.IsBanned()).Then(orig)
-      ?.Invoke(instance, param, value);
+    internal static void SetParam(string? param, float value)
+    {
+        static double Score(string? param, ParameterInstance x)
+        {
+            x.getDescription(out var d);
+            return param.JaroEmik(d.name);
+        }
+
+        s_parameters?.MaxBy(x => Score(param, x))?.setValue(value);
+    }
+
+    internal static void SetParameter(OnAudio.orig_SetParameter orig, EventInstance instance, string param, float value)
+    {
+        if (!IsPlaying || instance.IsBanned() || instance != Audio.CurrentMusicEventInstance)
+            orig(instance, param, value);
+
+        if (GramophoneModule.Settings.Inhibit)
+            SetParam(param, value);
+    }
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
