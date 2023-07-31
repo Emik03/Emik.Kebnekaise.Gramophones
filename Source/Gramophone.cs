@@ -6,11 +6,6 @@ static class Gramophone
 {
     public const int MaxLength = 25;
 
-    static readonly Action s_endSnapshot = (Action)Delegate.CreateDelegate(
-        typeof(Action), // ReSharper disable once NullableWarningSuppressionIsUsed
-        typeof(Audio).GetMethod("EndMainDownSnapshot", BindingFlags.Static | BindingFlags.NonPublic)!
-    );
-
     static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
 
     static bool s_hasInit;
@@ -129,7 +124,7 @@ static class Gramophone
     {
         _ = Searcher.Song;
         Previous = path;
-        (!IsPlaying).Then(orig)?.Invoke(path);
+        (!IsPlaying || GramophoneModule.Settings.Alt).Then(orig)?.Invoke(path);
     }
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
@@ -171,7 +166,7 @@ static class Gramophone
             new Button(Localized.Ambience).Pressed(MuteAmbience),
             shuffle,
             new OnOff(Localized.Params, GramophoneModule.Settings.Inhibit).Change(Inhibit),
-            new OnOff(Localized.Alt, GramophoneModule.Settings.Alt).Pressed(UseAlt),
+            new OnOff(Localized.Alt, GramophoneModule.Settings.Alt).Change(UseAlt),
             step,
             song,
             description,
@@ -186,9 +181,8 @@ static class Gramophone
         if (AudioSession is not { } audio)
             return;
 
-        Audio.SetAltMusic(path);
         Audio.SetMusic(path);
-        (!GramophoneModule.Settings.Alt).Then(s_endSnapshot)?.Invoke();
+        GramophoneModule.Settings.Alt.Then(() => Audio.SetAltMusic(path));
         IsPlaying = isPlaying;
         audio.Music.Event = path;
         audio.Apply();
