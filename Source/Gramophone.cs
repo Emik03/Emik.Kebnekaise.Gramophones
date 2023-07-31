@@ -101,11 +101,8 @@ static class Gramophone
            .ToList();
     }
 
-    internal static void SetAltMusic(OnAudio.orig_SetAltMusic? orig, string? path)
-    {
-        GramophoneModule.Settings.Alt.Then(() => SetPrevious(path));
-        (!GramophoneModule.Settings.Alt || !IsPlaying).Then(orig)?.Invoke(path);
-    }
+    internal static void SetAltMusic(OnAudio.orig_SetAltMusic? orig, string? path) =>
+        (GramophoneModule.Settings.Alt || !IsPlaying).Then(orig)?.Invoke(path);
 
     internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value)
     {
@@ -196,22 +193,21 @@ static class Gramophone
         s_items.Select(menu.Add).Enumerate();
     }
 
+    static void OverrideCassette()
+    {
+        Audio.SetAltMusic("");
+        s_endSnapshot();
+    }
+
     static void Set(string? path, bool isPlaying)
     {
         if (AudioSession is not { } audio)
             return;
 
-        if (GramophoneModule.Settings.Alt)
-        {
-            Audio.SetMusic("");
-            Audio.SetAltMusic(path);
-        }
-        else
-        {
-            Audio.SetAltMusic("");
-            Audio.SetMusic(path);
-            s_endSnapshot();
-        }
+        Audio.SetMusic(path);
+
+        if (!GramophoneModule.Settings.Alt)
+            OverrideCassette();
 
         audio.Music.Event = path;
         audio.Apply();

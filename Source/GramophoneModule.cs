@@ -28,7 +28,7 @@ public sealed class GramophoneModule : EverestModule
     [Command("gramophone_stop", "[Gramophone] Stop a song")]
     public static void Stop() => Gramophone.Stop();
 
-    [Command("gramophone_alternate", "[Gramophone] Toggles whether to play through the main or cassette channel.")]
+    [Command("gramophone_cassette", "[Gramophone] Toggles whether cassette music can override Gramophone.")]
     public static void UseAlt() => Gramophone.UseAlt();
 
     public override void CreateModMenuSection(TextMenu? menu, bool inGame, EventInstance? snapshot)

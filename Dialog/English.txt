@@ -1,5 +1,5 @@
 Gramophone_Alt=
-Toggle Music Channel (Main/Cassette)
+Preserve Cassette Music
 
 Gramophone_Ambience=
 Mute Ambience

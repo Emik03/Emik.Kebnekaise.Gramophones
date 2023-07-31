@@ -5,6 +5,10 @@ namespace Emik.Kebnekaise.Gramophones;
 [CLSCompliant(false)]
 public sealed class GramophoneSettings : EverestModuleSettings
 {
+    /// <summary>Gets or sets a value indicating whether Cassette music is to be preserved.</summary>
+    [SettingIgnore]
+    public bool Alt { get; set; } = true;
+
     /// <summary>Gets or sets a value indicating whether this mod is enabled.</summary>
     [SettingIgnore]
     public bool Enabled { get; set; } = true;
@@ -13,13 +17,9 @@ public sealed class GramophoneSettings : EverestModuleSettings
     [SettingIgnore]
     public bool Menu { get; set; } = true;
 
-    /// <summary>Gets or sets a value indicating whether <see cref="Gramophone" /> is shown on the menu.</summary>
+    /// <summary>Gets or sets a value indicating whether the game is able to mutate FMOD Parameters.</summary>
     [SettingIgnore]
     public bool Inhibit { get; set; } = true;
-
-    /// <summary>Gets or sets a value indicating whether music is played through the alternative channel.</summary>
-    [SettingIgnore]
-    public bool Alt { get; set; }
 
     /// <summary>Gets or sets a value how many steps are equivalent to 1 in FMOD.</summary>
     [SettingIgnore, ValueRange(1, int.MaxValue)]

@@ -2,7 +2,7 @@
 
 ## GramophoneSettings.Alt Property
 
-Gets or sets a value indicating whether music is played through the alternative channel.
+Gets or sets a value indicating whether Cassette music is to be preserved.
 
 ```csharp
 public bool Alt { get; set; }

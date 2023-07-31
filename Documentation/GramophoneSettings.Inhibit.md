@@ -2,7 +2,7 @@
 
 ## GramophoneSettings.Inhibit Property
 
-Gets or sets a value indicating whether [Emik.Kebnekaise.Gramophones.Gramophone](https://docs.microsoft.com/en-us/dotnet/api/Emik.Kebnekaise.Gramophones.Gramophone 'Emik.Kebnekaise.Gramophones.Gramophone') is shown on the menu.
+Gets or sets a value indicating whether the game is able to mutate FMOD Parameters.
 
 ```csharp
 public bool Inhibit { get; set; }
