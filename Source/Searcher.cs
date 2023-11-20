@@ -5,7 +5,7 @@ namespace Emik.Kebnekaise.Gramophones;
 // ReSharper disable once NullableWarningSuppressionIsUsed
 static class Searcher
 {
-#if NETFRAMEWORK
+#if !NETCOREAPP
     static readonly FMOD.Studio.System s_system = (FMOD.Studio.System)typeof(Audio)
        .GetField("system", BindingFlags.NonPublic | BindingFlags.Static)!
        .GetValue(null);
@@ -126,14 +126,14 @@ static class Searcher
 
         if (path is null || Audio.cachedEventDescriptions.TryGetValue(path, out ret))
             return ret;
-#if NETFRAMEWORK
-        var result = path.StartsWith(Prefix)
-            ? s_system.getEventByID(new(path[Prefix.Length..]), out ret)
-            : s_system.getEvent(path, out ret);
-#else
+#if NETCOREAPP
         var result = Audio.cachedModEvents.TryGetValue(path, out ret) ? RESULT.OK :
             path.StartsWith(Prefix) ? Audio.System.getEventByID(new(path[Prefix.Length..]), out ret) :
             Audio.System.getEvent(path, out ret);
+#else
+        var result = path.StartsWith(Prefix)
+            ? s_system.getEventByID(new(path[Prefix.Length..]), out ret)
+            : s_system.getEvent(path, out ret);
 #endif
         if (result is not RESULT.OK)
             return ret;
