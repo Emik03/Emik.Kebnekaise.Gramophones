@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: MPL-2.0
-#pragma warning disable SA1600
+#pragma warning disable S2971, SA1600
 namespace Emik.Kebnekaise.Gramophones;
 
+// ReSharper disable once NullableWarningSuppressionIsUsed
 static class Searcher
 {
-    static readonly string[] s_banned = { "char", "env", "game", "menu", "sound", "sfx", "ui" };
+#if NETFRAMEWORK
+    static readonly FMOD.Studio.System s_system = (FMOD.Studio.System)typeof(Audio)
+       .GetField("system", BindingFlags.NonPublic | BindingFlags.Static)!
+       .GetValue(null);
+#endif
+    static readonly string[] s_banned = ["char", "env", "game", "menu", "sound", "sfx", "ui"];
 
     static string? s_previous;
 
@@ -52,7 +58,7 @@ static class Searcher
         sorted.ToList().For((x, i) => s_songs[i] = x);
     }
 
-    internal static bool IsBanned(this string? path) => path is not null && s_banned.Any(path.Contains);
+    internal static bool IsBanned(this string? path) => path is not null && Array.Exists(s_banned, path.Contains);
 
     internal static double Score(string? s) => s.JaroEmik(Query, CharComparer.Default);
 
@@ -120,11 +126,15 @@ static class Searcher
 
         if (path is null || Audio.cachedEventDescriptions.TryGetValue(path, out ret))
             return ret;
-
+#if NETFRAMEWORK
+        var result = path.StartsWith(Prefix)
+            ? s_system.getEventByID(new(path[Prefix.Length..]), out ret)
+            : s_system.getEvent(path, out ret);
+#else
         var result = Audio.cachedModEvents.TryGetValue(path, out ret) ? RESULT.OK :
             path.StartsWith(Prefix) ? Audio.System.getEventByID(new(path[Prefix.Length..]), out ret) :
             Audio.System.getEvent(path, out ret);
-
+#endif
         if (result is not RESULT.OK)
             return ret;
 
@@ -144,7 +154,7 @@ static class Searcher
                 Audio.SetMusic(s_previous);
         }
 
-        static bool Desired(string x) => x.StartsWith("event:/") && !s_banned.Any(x.Contains);
+        static bool Desired(string x) => x.StartsWith("event:/") && !Array.Exists(s_banned, x.Contains);
 
         static bool HasParams(string x)
         {
@@ -188,7 +198,7 @@ static class Searcher
            .SelectMany(Read)
            .Concat(Local())
            .Where(Desired)
-           .Distinct(StringComparer.OrdinalIgnoreCase)
+           .ToSet(StringComparer.OrdinalIgnoreCase)
            .Where(HasParams)
            .OrderBy(Self, StringComparer.OrdinalIgnoreCase)
            .ToList()
