@@ -1,15 +1,11 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
-#pragma warning disable SA1600
+#pragma warning disable S1450, SA1600, RCS1249
 namespace Emik.Kebnekaise.Gramophones;
 
+// ReSharper disable NullableWarningSuppressionIsUsed
 static class Gramophone
 {
     public const int MaxLength = 25;
-
-    static readonly Action s_endSnapshot = (Action)Delegate.CreateDelegate(
-        typeof(Action), // ReSharper disable once NullableWarningSuppressionIsUsed
-        typeof(Audio).GetMethod("EndMainDownSnapshot", BindingFlags.Static | BindingFlags.NonPublic)!
-    );
 
     static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
 
@@ -24,6 +20,8 @@ static class Gramophone
 
     internal static SubHeader Fallback =>
         new(((string)Localized.Previous).Replace(Localized.SearchTemplate, MakeFriendly(Previous)), false);
+
+    static readonly Action<CassetteBlockManager, EventInstance> s_sfx = Sfx();
 
     internal static bool IsPlaying { get; set; }
 
@@ -101,9 +99,6 @@ static class Gramophone
            .ToList();
     }
 
-    internal static void SetAltMusic(OnAudio.orig_SetAltMusic? orig, string? path) =>
-        (GramophoneModule.Settings.Alt || !IsPlaying).Then(orig)?.Invoke(path);
-
     internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value)
     {
         if (!IsPlaying || path.IsBanned())
@@ -147,6 +142,14 @@ static class Gramophone
     {
         SetPrevious(path);
         return !IsPlaying && (orig?.Invoke(path, startPlaying, allowFadeOut) ?? false);
+    }
+
+    internal static void Update(OnCassetteBlockManager.orig_Update orig, CassetteBlockManager self)
+    {
+        if (IsPlaying && GramophoneModule.Settings.Alt)
+            s_sfx(self, Audio.CurrentMusicEventInstance);
+
+        orig(self);
     }
 
     internal static void Stop() => Set(Previous, false);
@@ -193,22 +196,12 @@ static class Gramophone
         s_items.Select(menu.Add).Enumerate();
     }
 
-    static void OverrideCassette()
-    {
-        Audio.SetAltMusic("");
-        s_endSnapshot();
-    }
-
     static void Set(string? path, bool isPlaying)
     {
         if (AudioSession is not { } audio)
             return;
 
         Audio.SetMusic(path);
-
-        if (!GramophoneModule.Settings.Alt)
-            OverrideCassette();
-
         audio.Music.Event = path;
         audio.Apply();
         IsPlaying = isPlaying;
@@ -224,10 +217,7 @@ static class Gramophone
     {
         const string PauseSnapshot = nameof(PauseSnapshot);
 
-        // ReSharper disable once NullableWarningSuppressionIsUsed
-#pragma warning disable RCS1249
         using var data = new DynData<Level>(level!);
-#pragma warning restore RCS1249
         var pause = data.Get<EventInstance>(PauseSnapshot);
         var menu = new TextMenu().AddMenus(pause);
 
@@ -312,6 +302,16 @@ static class Gramophone
            .Conjoin('\n');
     }
 
+    static Action<CassetteBlockManager, EventInstance> Sfx()
+    {
+        var info = typeof(CassetteBlockManager).GetField("sfx", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var cassette = Expression.Parameter(typeof(CassetteBlockManager));
+        var instance = Expression.Parameter(typeof(EventInstance));
+        var field = Expression.Field(instance, info);
+        var assign = Expression.Assign(field, instance);
+        return Expression.Lambda<Action<CassetteBlockManager, EventInstance>>(assign, cassette, instance).Compile();
+    }
+
     static Slider MakeSlider()
     {
         int index = Searcher.Song.IndexOf(Current) is var i && i is -1
@@ -356,6 +356,7 @@ static class Gramophone
             TextInput.OnInput -= Input;
         }
 
+        // ReSharper disable once LocalFunctionHidesMethod
         void Update() => UpdateDisplay(song, description);
 
         void Input(char c) => Searcher.Process(c, Update);

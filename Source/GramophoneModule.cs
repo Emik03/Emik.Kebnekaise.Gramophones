@@ -50,8 +50,8 @@ public sealed class GramophoneModule : EverestModule
     {
         AudioState.Apply += Gramophone.Apply;
         OnAudio.SetMusic += Gramophone.SetMusic;
-        OnAudio.SetAltMusic += Gramophone.SetAltMusic;
         OnAudio.SetParameter += Gramophone.SetParameter;
+        OnCassetteBlockManager.Update += Gramophone.Update;
         OnAudio.SetMusicParam += Gramophone.SetMusicParam;
         Everest.Events.Level.OnCreatePauseMenuButtons += Gramophone.Pause;
     }
@@ -62,7 +62,6 @@ public sealed class GramophoneModule : EverestModule
 
         AudioState.Apply -= Gramophone.Apply;
         OnAudio.SetMusic -= Gramophone.SetMusic;
-        OnAudio.SetAltMusic -= Gramophone.SetAltMusic;
         OnAudio.SetParameter -= Gramophone.SetParameter;
         OnAudio.SetMusicParam -= Gramophone.SetMusicParam;
         Everest.Events.Level.OnCreatePauseMenuButtons -= Gramophone.Pause;

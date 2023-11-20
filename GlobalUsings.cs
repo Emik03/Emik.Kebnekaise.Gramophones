@@ -49,6 +49,7 @@ global using Dialog = Celeste.Dialog;
 global using EventInstance = FMOD.Studio.EventInstance;
 global using Level = Celeste.Level;
 global using OnAudio = On.Celeste.Audio;
+global using OnCassetteBlockManager = On.Celeste.CassetteBlockManager;
 global using Slider = Celeste.TextMenu.Slider;
 global using TextMenu = Celeste.TextMenu;
 global using ZipFile = Ionic.Zip.ZipFile;
