@@ -5,6 +5,8 @@
         <IsCeleste>true</IsCeleste>
         <FileVersion>1.1</FileVersion>
         <TargetFrameworks>net452;net7.0</TargetFrameworks>
+        <PackageTags>Audio Celeste Everest FMOD Hook</PackageTags>
+        <RepositoryUrl>https://github.com/Emik03/Emik.Kebnekaise.Gramophones</RepositoryUrl>
         <Description>Celeste/Everest Mod that allows you to play any FMOD bank, anywhere.</Description>
     </PropertyGroup>
     <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard1.3'))">
