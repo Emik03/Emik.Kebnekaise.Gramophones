@@ -249,7 +249,7 @@ static class Gramophone
 
     static void UpdateDisplay(Slider? song, SubHeader? description)
     {
-        int NewValue() => (int)(Searcher.Score(song.Values.FirstOrDefault()?.Item1) * 100);
+        int NewValue() => (int)(Searcher.Score(song.Values.Nth(0)?.Item1) * 100);
 
         if (song is null || description is null)
             return;
