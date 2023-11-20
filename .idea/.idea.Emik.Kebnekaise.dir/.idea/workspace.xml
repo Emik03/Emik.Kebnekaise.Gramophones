@@ -4,19 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e5203e5-bca1-47e4-b705-866a6a24fe89" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Emik.Kebnekaise.Gramophones.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Emik.Kebnekaise.Gramophones.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Emik.Kebnekaise.Gramophones.csproj.DotSettings" beforeDir="false" afterPath="$PROJECT_DIR$/Emik.Kebnekaise.Gramophones.csproj.DotSettings" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GlobalUsings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/GlobalUsings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Gramophone.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Gramophone.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/GramophoneModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/GramophoneModule.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Searcher.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Searcher.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/everest.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/everest.yaml" afterDir="false" />
-    </list>
+    <list default="true" id="3e5203e5-bca1-47e4-b705-866a6a24fe89" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3ec5f2e713f847f7b405e1fbddf78cb5eb600/07/d1585c5a/RegexOptions.cs" root0="SKIP_HIGHLIGHTING" />
@@ -89,18 +84,20 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/home/emik/RiderProjects/Emik/Emik.Kebnekaise.sln",
+    "git-widget-placeholder": "core",
+    "last_opened_file_path": "/home/emik/.steam/steam/steamapps/common/Celeste/Mods/Gramophone/Code/Emik.Kebnekaise.Gramophones/Emik.Kebnekaise.Gramophones.sln",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "preferences.fileTypes",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
     "rider.external.source.directories": [
-      "/home/emik/.config/JetBrains/Rider2023.2/resharper-host/DecompilerCache",
-      "/home/emik/.config/JetBrains/Rider2023.2/resharper-host/SourcesCache",
+      "/home/emik/.config/JetBrains/Rider2023.3/resharper-host/DecompilerCache",
+      "/home/emik/.config/JetBrains/Rider2023.3/resharper-host/SourcesCache",
       "/home/emik/.local/share/Symbols/src"
     ]
   }
@@ -115,6 +112,7 @@
       <updated>1690701329956</updated>
       <workItem from="1690701330947" duration="5799000" />
       <workItem from="1690708245952" duration="11671000" />
+      <workItem from="1700513725855" duration="345000" />
     </task>
     <servers />
   </component>
