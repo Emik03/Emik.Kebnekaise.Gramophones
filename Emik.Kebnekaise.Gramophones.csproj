@@ -11,7 +11,6 @@
         <FileVersion>2.1</FileVersion>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Remove="Emik.SourceGenerators.Tattoo"/>
         <PackageReference Include="Emik.Results" Version="2.1.1" PrivateAssets="all"/>
     </ItemGroup>
 </Project>
