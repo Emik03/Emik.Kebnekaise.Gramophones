@@ -235,6 +235,17 @@ static class Gramophone
             }
         );
 
+        var alt = new OnOff(Localized.Alt, GramophoneModule.Settings.Alt)
+        {
+            Disabled = GramophoneModule.Settings.Inhibit,
+        }.Change(UseAlt);
+
+        void Change(bool x)
+        {
+            Inhibit(x);
+            alt.Disabled = x;
+        }
+
         s_items = new List<Item>
         {
             new Header(Localized.Gramo),
@@ -243,8 +254,8 @@ static class Gramophone
             new Button(Localized.Stop).Pressed(Stop),
             shuffle,
             new OnOff(Localized.Ambience, IsPaused ?? false).Pressed(Ambience),
-            new OnOff(Localized.Params, GramophoneModule.Settings.Inhibit).Change(Inhibit),
-            new OnOff(Localized.Alt, GramophoneModule.Settings.Alt).Change(UseAlt),
+            new OnOff(Localized.Params, GramophoneModule.Settings.Inhibit).Change(Change),
+            alt,
             step,
             song,
             description,
@@ -263,6 +274,7 @@ static class Gramophone
             return;
 
         s_sfxSetter(self, other);
+        sfx?.stop(STOP_MODE.ALLOWFADEOUT);
         sfx?.release();
     }
 
@@ -368,10 +380,9 @@ static class Gramophone
 
     static Action<CassetteBlockManager, EventInstance?> Setter()
     {
-        var info = typeof(CassetteBlockManager).GetField("sfx", BindingFlags.NonPublic | BindingFlags.Instance)!;
         var cassette = Expression.Parameter(typeof(CassetteBlockManager));
         var instance = Expression.Parameter(typeof(EventInstance));
-        var field = Expression.Field(cassette, info);
+        var field = Expression.Field(cassette, s_sfx);
         var assign = Expression.Assign(field, instance);
         return Expression.Lambda<Action<CassetteBlockManager, EventInstance?>>(assign, cassette, instance).Compile();
     }
