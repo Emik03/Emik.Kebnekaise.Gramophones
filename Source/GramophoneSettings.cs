@@ -14,7 +14,7 @@ public sealed class GramophoneSettings : EverestModuleSettings
     public bool Enabled { get; set; } = true;
 
     /// <summary>Gets or sets a value indicating whether <see cref="Gramophone" /> is shown on the menu.</summary>
-    [SettingIgnore]
+    [SettingIgnore] // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
     public bool Menu { get; set; } = true;
 
     /// <summary>Gets or sets a value indicating whether the game is able to mutate FMOD Parameters.</summary>

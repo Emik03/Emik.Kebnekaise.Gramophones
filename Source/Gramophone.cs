@@ -92,8 +92,6 @@ static class Gramophone
         if (!IsPlaying)
             Previous = Audio.CurrentMusic;
 
-        // Temporarily assign to false to allow the song to be played.
-        IsPlaying = false;
         Set(song, true);
         Current = song;
 
@@ -106,7 +104,8 @@ static class Gramophone
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
     {
-        SetPrevious(path);
+        _ = Searcher.Song;
+        Previous = path;
         return !IsPlaying && (orig?.Invoke(path, startPlaying, allowFadeOut) ?? false);
     }
 
@@ -131,13 +130,11 @@ static class Gramophone
         string name,
         float f
     ) =>
-        !IsPlaying || self.IsBanned() || self != Audio.CurrentMusicEventInstance && GramophoneModule.Settings.Alt ?
+        !IsPlaying || self != Audio.CurrentMusicEventInstance && GramophoneModule.Settings.Alt || self.IsBanned() ?
             orig(self, name, f) :
-            !GramophoneModule.Settings.Inhibit ? RESULT.OK : self.Parameters()
-                   .Omit(x => x.Name() is "fade")
-                   .MaxBy(x => name.JaroEmik(x.Name()))
-                  ?.setValue(f) ??
-                orig(self, name, f);
+            GramophoneModule.Settings.Inhibit ?
+                self.Parameters().Omit(x => x.Name() is "fade").MaxBy(x => name.JaroEmik(x.Name()))?.setValue(f) ??
+                orig(self, name, f) : RESULT.OK;
 
     internal static RESULT SetValue(OnParameterInstance.orig_setValue orig, ParameterInstance self, float f) =>
         !IsPlaying || self.Description() is var description && description.name.IsBanned() ? orig(self, f) :
@@ -235,17 +232,6 @@ static class Gramophone
             }
         );
 
-        var alt = new OnOff(Localized.Alt, GramophoneModule.Settings.Alt)
-        {
-            Disabled = GramophoneModule.Settings.Inhibit,
-        }.Change(UseAlt);
-
-        void Change(bool x)
-        {
-            Inhibit(x);
-            alt.Disabled = x;
-        }
-
         s_items = new List<Item>
         {
             new Header(Localized.Gramo),
@@ -254,8 +240,9 @@ static class Gramophone
             new Button(Localized.Stop).Pressed(Stop),
             shuffle,
             new OnOff(Localized.Ambience, IsPaused ?? false).Pressed(Ambience),
-            new OnOff(Localized.Params, GramophoneModule.Settings.Inhibit).Change(Change),
-            alt,
+            new OnOff(Localized.Params, GramophoneModule.Settings.Inhibit).Change(Inhibit),
+            new OnOff(Localized.Alt, GramophoneModule.Settings.Alt) { Disabled = GramophoneModule.Settings.Inhibit }
+               .Change(UseAlt),
             step,
             song,
             description,
@@ -283,16 +270,11 @@ static class Gramophone
         if (AudioSession is not { } audio)
             return;
 
+        IsPlaying = false;
         Audio.SetMusic(path);
         audio.Music.Event = path;
         audio.Apply();
         IsPlaying = isPlaying;
-    }
-
-    static void SetPrevious(string? path)
-    {
-        _ = Searcher.Song;
-        Previous = path;
     }
 
     static void Screen(this Level? level, int returnIndex, bool minimal)
