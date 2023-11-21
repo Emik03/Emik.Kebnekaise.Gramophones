@@ -9,7 +9,14 @@ static class Gramophone
 
     static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
 
-    static bool s_hasInit;
+    static readonly FieldInfo s_sfx =
+        typeof(CassetteBlockManager).GetField("sfx", BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+    static readonly Converter<CassetteBlockManager, EventInstance?> s_sfxGetter = Getter();
+
+    static readonly Action<CassetteBlockManager, EventInstance?> s_sfxSetter = Setter();
+
+    static bool s_hasInit, s_hasOverridenCassette;
 
     // Do not inline. This exists purely for lifetime reasons. (to prevent GC from collecting)
     static IList<Item>? s_items;
@@ -21,11 +28,9 @@ static class Gramophone
     internal static SubHeader Fallback =>
         new(((string)Localized.Previous).Replace(Localized.SearchTemplate, MakeFriendly(Previous)), false);
 
-    static readonly Action<CassetteBlockManager, EventInstance> s_sfx = Sfx();
-
     internal static bool IsPlaying { get; set; }
 
-    internal static bool? IsPaused => Audio.CurrentAmbienceEventInstance.getPaused(out var x) is RESULT.OK ? x : null;
+    internal static bool? IsPaused => Audio.CurrentAmbienceEventInstance?.getPaused(out var x) is RESULT.OK ? x : null;
 
     internal static string? Previous { get; set; }
 
@@ -147,7 +152,9 @@ static class Gramophone
     internal static void Update(OnCassetteBlockManager.orig_Update orig, CassetteBlockManager self)
     {
         if (IsPlaying && GramophoneModule.Settings.Alt)
-            s_sfx(self, Audio.CurrentMusicEventInstance);
+            Replace(self, Audio.CurrentMusicEventInstance, true);
+        else if (s_hasOverridenCassette && Engine.Scene is Level { Session.Area.ID: var id })
+            Replace(self, Audio.CreateInstance(AreaData.Areas[id].CassetteSong), false);
 
         orig(self);
     }
@@ -194,6 +201,18 @@ static class Gramophone
 
         s_old?.For(s_items.Add);
         s_items.Select(menu.Add).Enumerate();
+    }
+
+    static void Replace(CassetteBlockManager self, EventInstance? other, bool hasOverridenCassette)
+    {
+        var sfx = s_sfxGetter(self);
+        s_hasOverridenCassette = hasOverridenCassette;
+
+        if (sfx == other)
+            return;
+
+        s_sfxSetter(self, other);
+        sfx?.release();
     }
 
     static void Set(string? path, bool isPlaying)
@@ -302,14 +321,21 @@ static class Gramophone
            .Conjoin('\n');
     }
 
-    static Action<CassetteBlockManager, EventInstance> Sfx()
+    static Converter<CassetteBlockManager, EventInstance?> Getter()
+    {
+        var cassette = Expression.Parameter(typeof(CassetteBlockManager));
+        var field = Expression.Field(cassette, s_sfx);
+        return Expression.Lambda<Converter<CassetteBlockManager, EventInstance?>>(field, cassette).Compile();
+    }
+
+    static Action<CassetteBlockManager, EventInstance?> Setter()
     {
         var info = typeof(CassetteBlockManager).GetField("sfx", BindingFlags.NonPublic | BindingFlags.Instance)!;
         var cassette = Expression.Parameter(typeof(CassetteBlockManager));
         var instance = Expression.Parameter(typeof(EventInstance));
         var field = Expression.Field(cassette, info);
         var assign = Expression.Assign(field, instance);
-        return Expression.Lambda<Action<CassetteBlockManager, EventInstance>>(assign, cassette, instance).Compile();
+        return Expression.Lambda<Action<CassetteBlockManager, EventInstance?>>(assign, cassette, instance).Compile();
     }
 
     static Slider MakeSlider()
