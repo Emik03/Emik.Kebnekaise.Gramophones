@@ -154,8 +154,11 @@ static class Gramophone
         if (IsPlaying && GramophoneModule.Settings.Alt)
             Replace(self, Audio.CurrentMusicEventInstance, true);
         else if (s_hasOverridenCassette && Engine.Scene is Level { Session.Area.ID: var id })
+#if NETCOREAPP
             Replace(self, Audio.CreateInstance(AreaData.Areas[id].CassetteSong), false);
-
+#else
+            Replace(self, Audio.Play(AreaData.Areas[id].CassetteSong), false);
+#endif
         orig(self);
     }
 
