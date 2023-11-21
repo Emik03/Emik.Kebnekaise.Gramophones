@@ -307,7 +307,7 @@ static class Gramophone
         var info = typeof(CassetteBlockManager).GetField("sfx", BindingFlags.NonPublic | BindingFlags.Instance)!;
         var cassette = Expression.Parameter(typeof(CassetteBlockManager));
         var instance = Expression.Parameter(typeof(EventInstance));
-        var field = Expression.Field(instance, info);
+        var field = Expression.Field(cassette, info);
         var assign = Expression.Assign(field, instance);
         return Expression.Lambda<Action<CassetteBlockManager, EventInstance>>(assign, cassette, instance).Compile();
     }
