@@ -7,6 +7,9 @@ static class Gramophone
 {
     public const int MaxLength = 25;
 
+    // Some wiggle-room should be allowed to allow the values to be inclusive.
+    const float Margin = 1 / 16f;
+
     static readonly Dictionary<string, string> s_friendly = new(StringComparer.OrdinalIgnoreCase);
 
     static readonly FieldInfo s_sfx =
@@ -130,18 +133,16 @@ static class Gramophone
         string name,
         float f
     ) =>
-        !IsPlaying || self != Audio.CurrentMusicEventInstance && GramophoneModule.Settings.Alt || self.IsBanned() ?
-            orig(self, name, f) :
+        !IsPlaying || self != Audio.CurrentMusicEventInstance || self.IsBanned() ? orig(self, name, f) :
             GramophoneModule.Settings.Inhibit ?
                 self.Parameters().Omit(x => x.Name() is "fade").MaxBy(x => name.JaroEmik(x.Name()))?.setValue(f) ??
                 orig(self, name, f) : RESULT.OK;
 
     internal static RESULT SetValue(OnParameterInstance.orig_setValue orig, ParameterInstance self, float f) =>
-        !IsPlaying || self.Description() is var description && description.name.IsBanned() ? orig(self, f) :
+        !IsPlaying ? orig(self, f) :
         GramophoneModule.Settings.Inhibit &&
-        description is { maximum: var max, minimum: var min } &&
-        max - min is var mod ? orig(self, ((f - min) % mod + mod) % mod + min) : RESULT.OK;
-
+        self.Description() is { maximum: var max, minimum: var min } &&
+        max - min + Margin is var mod ? orig(self, mod is 0 ? f : ((f - min) % mod + mod) % mod + min) : RESULT.OK;
 #pragma warning disable MA0051
     internal static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
 #pragma warning restore MA0051
@@ -195,7 +196,7 @@ static class Gramophone
             {
                 var old = GramophoneModule.Settings.Inhibit;
                 GramophoneModule.Settings.Inhibit = true;
-                p.setValue(i / step);
+                p.setValue(i / (float)GramophoneModule.Settings.Step);
                 GramophoneModule.Settings.Inhibit = old;
             }
 
@@ -213,7 +214,7 @@ static class Gramophone
     {
         Button shuffle = new(ShuffleText);
 
-        var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 20, GramophoneModule.Settings.Step)
+        var step = new Slider(Localized.Step, Stringifier.Stringify, 1, 10, GramophoneModule.Settings.Step)
            .Change(
                 x =>
                 {
@@ -232,8 +233,8 @@ static class Gramophone
             }
         );
 
-        s_items = new List<Item>
-        {
+        s_items =
+        [
             new Header(Localized.Gramo),
             new SubHeader(Localized.Which),
             Fallback,
@@ -241,12 +242,11 @@ static class Gramophone
             shuffle,
             new OnOff(Localized.Ambience, IsPaused ?? false).Pressed(Ambience),
             new OnOff(Localized.Params, GramophoneModule.Settings.Inhibit).Change(Inhibit),
-            new OnOff(Localized.Alt, GramophoneModule.Settings.Alt) { Disabled = GramophoneModule.Settings.Inhibit }
-               .Change(UseAlt),
+            new OnOff(Localized.Alt, GramophoneModule.Settings.Alt).Change(UseAlt),
             step,
             song,
             description,
-        };
+        ];
 
         s_old?.For(s_items.Add);
         s_items.Select(menu.Add).Enumerate();
