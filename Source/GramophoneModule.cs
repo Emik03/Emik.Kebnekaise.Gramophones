@@ -35,16 +35,7 @@ public sealed class GramophoneModule : EverestModule
     public override void CreateModMenuSection(TextMenu? menu, bool inGame, EventInstance? snapshot)
     {
         base.CreateModMenuSection(menu, inGame, snapshot);
-
-        new[]
-        {
-            (Item)Gramophone.Fallback,
-            new OnOff(Localized.Enable, Settings.Enabled).Change(x => Settings.Enabled = x),
-            new OnOff(Localized.Menu, Settings.Menu).Change(x => Settings.Menu = x),
-            new OnOff(Localized.Ambience, Gramophone.IsPaused ?? false).Change(Gramophone.Ambience),
-            new OnOff(Localized.Params, Settings.Inhibit).Change(Gramophone.Inhibit),
-            new OnOff(Localized.Alt, Settings.Alt).Change(Gramophone.UseAlt),
-        }.For(x => menu?.Add(x));
+        menu?.AddMenus(snapshot);
     }
 
     public override void Load()
@@ -52,9 +43,9 @@ public sealed class GramophoneModule : EverestModule
         AudioState.Apply += Gramophone.Apply;
         OnAudio.SetMusic += Gramophone.SetMusic;
         OnCassetteBlockManager.Update += Gramophone.Update;
-        On.FMOD.Studio.ParameterInstance.setValue += Gramophone.SetValue;
+        OnParameterInstance.setValue += Gramophone.SetValue;
         Everest.Events.Level.OnCreatePauseMenuButtons += Gramophone.Pause;
-        On.FMOD.Studio.EventInstance.setParameterValue += Gramophone.SetParameterValue;
+        OnEventInstance.setParameterValue += Gramophone.SetParameterValue;
     }
 
     public override void Unload()
@@ -64,8 +55,8 @@ public sealed class GramophoneModule : EverestModule
         AudioState.Apply -= Gramophone.Apply;
         OnAudio.SetMusic -= Gramophone.SetMusic;
         OnCassetteBlockManager.Update -= Gramophone.Update;
-        On.FMOD.Studio.ParameterInstance.setValue -= Gramophone.SetValue;
+        OnParameterInstance.setValue -= Gramophone.SetValue;
         Everest.Events.Level.OnCreatePauseMenuButtons -= Gramophone.Pause;
-        On.FMOD.Studio.EventInstance.setParameterValue -= Gramophone.SetParameterValue;
+        OnEventInstance.setParameterValue -= Gramophone.SetParameterValue;
     }
 }

@@ -126,27 +126,91 @@ static class Gramophone
     internal static void Stop() => Set(Previous, false);
 
     internal static RESULT SetParameterValue(
-        On.FMOD.Studio.EventInstance.orig_setParameterValue orig,
+        OnEventInstance.orig_setParameterValue orig,
         EventInstance self,
         string name,
         float f
     ) =>
-        !IsPlaying || self.IsBanned() ? orig(self, name, f) :
-        !GramophoneModule.Settings.Inhibit ? RESULT.OK : self.Parameters()
-           .Omit(x => x.Name() is "fade")
-           .MaxBy(x => name.JaroEmik(x.Name()))
-          ?.setValue(f) ??
-        orig(self, name, f);
+        !IsPlaying || self.IsBanned() || self != Audio.CurrentMusicEventInstance && GramophoneModule.Settings.Alt ?
+            orig(self, name, f) :
+            !GramophoneModule.Settings.Inhibit ? RESULT.OK : self.Parameters()
+                   .Omit(x => x.Name() is "fade")
+                   .MaxBy(x => name.JaroEmik(x.Name()))
+                  ?.setValue(f) ??
+                orig(self, name, f);
 
-    internal static RESULT SetValue(
-        On.FMOD.Studio.ParameterInstance.orig_setValue orig,
-        ParameterInstance self,
-        float f
-    ) =>
+    internal static RESULT SetValue(OnParameterInstance.orig_setValue orig, ParameterInstance self, float f) =>
         !IsPlaying || self.Description() is var description && description.name.IsBanned() ? orig(self, f) :
         GramophoneModule.Settings.Inhibit &&
         description is { maximum: var max, minimum: var min } &&
         max - min is var mod ? orig(self, ((f - min) % mod + mod) % mod + min) : RESULT.OK;
+
+#pragma warning disable MA0051
+    internal static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
+#pragma warning restore MA0051
+    {
+        var song = MakeSlider();
+        SubHeader description = new(Localized.Enter, false);
+
+        void Change(int x)
+        {
+            Play(Searcher.Song[x]);
+            Refresh();
+        }
+
+        void Refresh()
+        {
+            s_old?.Select(menu.Remove).Enumerate();
+            s_old = s_parameters?.Select(Item).ToList();
+            s_old?.Select(menu.Add).Enumerate();
+        }
+
+        void Enter() => Audio.EndSnapshot(pause);
+
+        void EnterSong()
+        {
+            Enter();
+            TextInput.OnInput += Input;
+        }
+
+        void Leave() => Audio.ResumeSnapshot(pause);
+
+        void LeaveSong()
+        {
+            Leave();
+            TextInput.OnInput -= Input;
+        }
+
+        // ReSharper disable once LocalFunctionHidesMethod
+        void Update() => UpdateDisplay(song, description);
+
+        void Input(char c) => Searcher.Process(c, Update);
+
+        Item Item(ParameterInstance p)
+        {
+            p.getValue(out var cur);
+            var step = (float)GramophoneModule.Settings.Step;
+            var description = p.Description();
+            var min = (int)Math.Floor(description.minimum);
+            var max = (int)Math.Ceiling(description.maximum);
+
+            void Change(int i)
+            {
+                var old = GramophoneModule.Settings.Inhibit;
+                GramophoneModule.Settings.Inhibit = true;
+                p.setValue(i / step);
+                GramophoneModule.Settings.Inhibit = old;
+            }
+
+            return new Slider(p.Name(), i => Math.Round(i / step, 2).Stringify(), min, max, (int)(cur * step))
+               .Change(Change)
+               .Enter(Enter)
+               .Leave(Leave);
+        }
+
+        menu.AddItems(song.Change(Change).Enter(EnterSong).Leave(LeaveSong), description, Update);
+        return menu;
+    }
 
     static void AddItems(this TextMenu menu, Item song, Item description, Action onChange)
     {
@@ -327,71 +391,5 @@ static class Gramophone
             upper = Searcher.Song.Count - 1;
 
         return new(Localized.Song, Friendly, 0, upper, index);
-    }
-#pragma warning disable MA0051
-    static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
-#pragma warning restore MA0051
-    {
-        var song = MakeSlider();
-        SubHeader description = new(Localized.Enter, false);
-
-        void Change(int x)
-        {
-            Play(Searcher.Song[x]);
-            Refresh();
-        }
-
-        void Refresh()
-        {
-            s_old?.Select(menu.Remove).Enumerate();
-            s_old = s_parameters?.Select(Item).ToList();
-            s_old?.Select(menu.Add).Enumerate();
-        }
-
-        void Enter() => Audio.EndSnapshot(pause);
-
-        void EnterSong()
-        {
-            Enter();
-            TextInput.OnInput += Input;
-        }
-
-        void Leave() => Audio.ResumeSnapshot(pause);
-
-        void LeaveSong()
-        {
-            Leave();
-            TextInput.OnInput -= Input;
-        }
-
-        // ReSharper disable once LocalFunctionHidesMethod
-        void Update() => UpdateDisplay(song, description);
-
-        void Input(char c) => Searcher.Process(c, Update);
-
-        Item Item(ParameterInstance p)
-        {
-            p.getValue(out var cur);
-            var step = (float)GramophoneModule.Settings.Step;
-            var description = p.Description();
-            var min = (int)Math.Floor(description.minimum);
-            var max = (int)Math.Ceiling(description.maximum);
-
-            void Change(int i)
-            {
-                var old = GramophoneModule.Settings.Inhibit;
-                GramophoneModule.Settings.Inhibit = true;
-                p.setValue(i / step);
-                GramophoneModule.Settings.Inhibit = old;
-            }
-
-            return new Slider(p.Name(), i => Math.Round(i / step, 2).Stringify(), min, max, (int)(cur * step))
-               .Change(Change)
-               .Enter(Enter)
-               .Leave(Leave);
-        }
-
-        menu.AddItems(song.Change(Change).Enter(EnterSong).Leave(LeaveSong), description, Update);
-        return menu;
     }
 }
