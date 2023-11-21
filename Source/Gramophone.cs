@@ -100,47 +100,8 @@ static class Gramophone
         s_parameters = Audio
            .CurrentMusicEventInstance
            .Parameters()
-           .OrderBy(Name, StringComparer.OrdinalIgnoreCase)
+           .OrderBy(Extensions.Name, StringComparer.OrdinalIgnoreCase)
            .ToList();
-    }
-
-    internal static void SetMusicParam(OnAudio.orig_SetMusicParam? orig, string? path, float value)
-    {
-        if (!IsPlaying || path.IsBanned())
-            orig?.Invoke(path, value);
-
-        if (GramophoneModule.Settings.Inhibit)
-            SetParam(path, value);
-    }
-
-    internal static void SetParam(string? param, string? value)
-    {
-        _ = float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var v);
-        SetParam(param, v);
-    }
-
-    internal static void SetParam(string? param, float value, EventInstance? instance = null)
-    {
-        static double Score(string? param, ParameterInstance x)
-        {
-            x.getDescription(out var d);
-            return param.JaroEmik(d.name);
-        }
-
-        (instance ?? Audio.CurrentMusicEventInstance)
-           .Parameters()
-           .Where(x => x.Name() is not "fade")
-           .MaxBy(x => Score(param, x))
-          ?.setValue(value);
-    }
-
-    internal static void SetParameter(OnAudio.orig_SetParameter orig, EventInstance instance, string param, float value)
-    {
-        if (!IsPlaying || instance.IsBanned())
-            orig(instance, param, value);
-
-        if (GramophoneModule.Settings.Inhibit)
-            SetParam(param, value, instance);
     }
 
     internal static bool SetMusic(OnAudio.orig_SetMusic? orig, string? path, bool startPlaying, bool allowFadeOut)
@@ -163,6 +124,29 @@ static class Gramophone
     }
 
     internal static void Stop() => Set(Previous, false);
+
+    internal static RESULT SetParameterValue(
+        On.FMOD.Studio.EventInstance.orig_setParameterValue orig,
+        EventInstance self,
+        string name,
+        float f
+    ) =>
+        !IsPlaying || self.IsBanned() ? orig(self, name, f) :
+        !GramophoneModule.Settings.Inhibit ? RESULT.OK : self.Parameters()
+           .Omit(x => x.Name() is "fade")
+           .MaxBy(x => name.JaroEmik(x.Name()))
+          ?.setValue(f) ??
+        orig(self, name, f);
+
+    internal static RESULT SetValue(
+        On.FMOD.Studio.ParameterInstance.orig_setValue orig,
+        ParameterInstance self,
+        float f
+    ) =>
+        !IsPlaying || self.Description() is var description && description.name.IsBanned() ? orig(self, f) :
+        GramophoneModule.Settings.Inhibit &&
+        description is { maximum: var max, minimum: var min } &&
+        max - min is var mod ? orig(self, ((f - min) % mod + mod) % mod + min) : RESULT.OK;
 
     static void AddItems(this TextMenu menu, Item song, Item description, Action onChange)
     {
@@ -302,12 +286,6 @@ static class Gramophone
         s_friendly.TryGetValue(s, out var val) ? val :
         s_friendly[s] = s.Split(":/").LastOrDefault()?.StringHell() ?? Localized.None;
 
-    static string Name(this ParameterInstance parameter)
-    {
-        parameter.getDescription(out var description);
-        return description.name;
-    }
-
     static string StringHell(this string wide)
     {
         var seenSlash = false;
@@ -324,13 +302,6 @@ static class Gramophone
            .Conjoin('\n');
     }
 
-    static Converter<CassetteBlockManager, EventInstance?> Getter()
-    {
-        var cassette = Expression.Parameter(typeof(CassetteBlockManager));
-        var field = Expression.Field(cassette, s_sfx);
-        return Expression.Lambda<Converter<CassetteBlockManager, EventInstance?>>(field, cassette).Compile();
-    }
-
     static Action<CassetteBlockManager, EventInstance?> Setter()
     {
         var info = typeof(CassetteBlockManager).GetField("sfx", BindingFlags.NonPublic | BindingFlags.Instance)!;
@@ -339,6 +310,13 @@ static class Gramophone
         var field = Expression.Field(cassette, info);
         var assign = Expression.Assign(field, instance);
         return Expression.Lambda<Action<CassetteBlockManager, EventInstance?>>(assign, cassette, instance).Compile();
+    }
+
+    static Converter<CassetteBlockManager, EventInstance?> Getter()
+    {
+        var cassette = Expression.Parameter(typeof(CassetteBlockManager));
+        var field = Expression.Field(cassette, s_sfx);
+        return Expression.Lambda<Converter<CassetteBlockManager, EventInstance?>>(field, cassette).Compile();
     }
 
     static Slider MakeSlider()
@@ -350,8 +328,9 @@ static class Gramophone
 
         return new(Localized.Song, Friendly, 0, upper, index);
     }
-
+#pragma warning disable MA0051
     static TextMenu AddMenus(this TextMenu menu, EventInstance? pause)
+#pragma warning restore MA0051
     {
         var song = MakeSlider();
         SubHeader description = new(Localized.Enter, false);
@@ -392,14 +371,22 @@ static class Gramophone
 
         Item Item(ParameterInstance p)
         {
-            const int MaxValue = 1000;
-
             p.getValue(out var cur);
-
             var step = (float)GramophoneModule.Settings.Step;
+            var description = p.Description();
+            var min = (int)Math.Floor(description.minimum);
+            var max = (int)Math.Ceiling(description.maximum);
 
-            return new Slider(p.Name(), i => Math.Round(i / step, 2).Stringify(), 0, MaxValue, (int)(cur * step))
-               .Change(i => p.setValue(i / step))
+            void Change(int i)
+            {
+                var old = GramophoneModule.Settings.Inhibit;
+                GramophoneModule.Settings.Inhibit = true;
+                p.setValue(i / step);
+                GramophoneModule.Settings.Inhibit = old;
+            }
+
+            return new Slider(p.Name(), i => Math.Round(i / step, 2).Stringify(), min, max, (int)(cur * step))
+               .Change(Change)
                .Enter(Enter)
                .Leave(Leave);
         }

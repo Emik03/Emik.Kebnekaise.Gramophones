@@ -20,7 +20,8 @@ public sealed class GramophoneModule : EverestModule
     public static void Play(string? song) => Gramophone.Play(song);
 
     [Command("gramophone_change", "[Gramophone] Change a parameter in the song")]
-    public static void Change(string? param, string? value) => Gramophone.SetParam(param, value);
+    public static void Change(string? param, float value) =>
+        Audio.CurrentMusicEventInstance.setParameterValue(param, value);
 
     [Command("gramophone_trigger", "[Gramophone] Toggles if the map is allowed to change song parameter values")]
     public static void Inhibit() => Gramophone.Inhibit();
@@ -50,10 +51,10 @@ public sealed class GramophoneModule : EverestModule
     {
         AudioState.Apply += Gramophone.Apply;
         OnAudio.SetMusic += Gramophone.SetMusic;
-        OnAudio.SetParameter += Gramophone.SetParameter;
         OnCassetteBlockManager.Update += Gramophone.Update;
-        OnAudio.SetMusicParam += Gramophone.SetMusicParam;
+        On.FMOD.Studio.ParameterInstance.setValue += Gramophone.SetValue;
         Everest.Events.Level.OnCreatePauseMenuButtons += Gramophone.Pause;
+        On.FMOD.Studio.EventInstance.setParameterValue += Gramophone.SetParameterValue;
     }
 
     public override void Unload()
@@ -62,8 +63,9 @@ public sealed class GramophoneModule : EverestModule
 
         AudioState.Apply -= Gramophone.Apply;
         OnAudio.SetMusic -= Gramophone.SetMusic;
-        OnAudio.SetParameter -= Gramophone.SetParameter;
-        OnAudio.SetMusicParam -= Gramophone.SetMusicParam;
+        OnCassetteBlockManager.Update -= Gramophone.Update;
+        On.FMOD.Studio.ParameterInstance.setValue -= Gramophone.SetValue;
         Everest.Events.Level.OnCreatePauseMenuButtons -= Gramophone.Pause;
+        On.FMOD.Studio.EventInstance.setParameterValue -= Gramophone.SetParameterValue;
     }
 }
