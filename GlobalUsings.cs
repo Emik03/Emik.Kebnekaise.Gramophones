@@ -42,6 +42,7 @@ global using JetBrains.Annotations;
 global using Monocle;
 global using MonoMod.Utils;
 global using RemoveReference;
+global using Serilog.Events;
 global using static Celeste.Mod.Everest.Loader;
 global using static Celeste.TextMenu;
 global using Audio = Celeste.Audio;
@@ -57,10 +58,6 @@ global using Slider = Celeste.TextMenu.Slider;
 global using TextMenu = Celeste.TextMenu;
 global using ZipFile = Ionic.Zip.ZipFile;
 
-namespace CommunityToolkit.Diagnostics { }
-
-namespace RemoveReference { }
-
 namespace System.Buffers { }
 
 namespace System.Collections.Immutable { }
@@ -68,3 +65,9 @@ namespace System.Collections.Immutable { }
 namespace System.Runtime.Intrinsics { }
 
 namespace System.Text.Unicode { }
+
+namespace CommunityToolkit.Diagnostics { }
+
+namespace RemoveReference { }
+
+namespace Serilog.Events { }
