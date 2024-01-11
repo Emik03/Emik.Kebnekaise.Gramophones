@@ -48,7 +48,7 @@ static class Localized
         public static implicit operator string(LocalString localString)
         {
             var name = $"{nameof(Gramophone)}_{localString.Key}";
-            return Dialog.Clean(name);
+            return Dialog.Clean(name).OrEmpty();
         }
     }
 }

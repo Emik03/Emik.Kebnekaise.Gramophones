@@ -2,6 +2,7 @@
 #pragma warning disable CS1591, SA1600
 namespace Emik.Kebnekaise.Gramophones;
 
+// ReSharper disable NullableWarningSuppressionIsUsed
 [CLSCompliant(false)]
 public sealed class GramophoneModule : EverestModule
 {
@@ -9,7 +10,7 @@ public sealed class GramophoneModule : EverestModule
 
     public static GramophoneModule Instance { get; private set; } = new();
 
-    public static GramophoneSettings Settings => (GramophoneSettings)Instance._Settings;
+    public static GramophoneSettings Settings => (GramophoneSettings?)Instance._Settings ?? new();
 
     public override Type SettingsType => typeof(GramophoneSettings);
 
@@ -17,11 +18,11 @@ public sealed class GramophoneModule : EverestModule
     public static void Ambience() => Gramophone.Ambience();
 
     [Command("gramophone_play", "[Gramophone] Play a song")]
-    public static void Play(string? song) => Gramophone.Play(song);
+    public static void Play(string song) => Gramophone.Play(song);
 
     [Command("gramophone_change", "[Gramophone] Change a parameter in the song")]
-    public static void Change(string? param, float value) =>
-        Audio.CurrentMusicEventInstance.setParameterValue(param, value);
+    public static void Change(string param, float value) =>
+        Audio.CurrentMusicEventInstance?.setParameterValue(param, value);
 
     [Command("gramophone_trigger", "[Gramophone] Toggles if the map is allowed to change song parameter values")]
     public static void Inhibit() => Gramophone.Inhibit();
@@ -34,7 +35,7 @@ public sealed class GramophoneModule : EverestModule
 
     public override void CreateModMenuSection(TextMenu? menu, bool inGame, EventInstance? snapshot)
     {
-        base.CreateModMenuSection(menu, inGame, snapshot);
+        base.CreateModMenuSection(menu!, inGame, snapshot!);
         menu?.AddMenus(snapshot);
     }
 

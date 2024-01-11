@@ -20,7 +20,7 @@ static class Extensions
         menu?.Close();
     }
 
-    internal static string Name(this ParameterInstance parameter) => parameter.Description().name;
+    internal static string Name(this ParameterInstance parameter) => parameter.Description().name ?? "<no name>";
 
     internal static IEnumerable<ParameterInstance> Parameters(this EventInstance? instance)
     {

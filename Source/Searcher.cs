@@ -2,13 +2,25 @@
 #pragma warning disable S2971, SA1600
 namespace Emik.Kebnekaise.Gramophones;
 
-// ReSharper disable once NullableWarningSuppressionIsUsed
+// ReSharper disable NullableWarningSuppressionIsUsed
 static class Searcher
 {
+    sealed class CharComparer : IEqualityComparer<char>
+    {
+        /// <summary>Gets the comparer.</summary>
+        public static CharComparer Default { get; } = new();
+
+        /// <inheritdoc />
+        public bool Equals(char x, char y) => x.IsWhitespace() && y.IsWhitespace() || x.ToUpper() == y.ToUpper();
+
+        /// <inheritdoc />
+        public int GetHashCode(char obj) => obj.IsWhitespace() ? '\t' : obj.ToUpper();
+    }
+
 #if !NETCOREAPP
-    static readonly FMOD.Studio.System s_system = (FMOD.Studio.System)typeof(Audio)
+    static readonly FMOD.Studio.System? s_system = typeof(Audio)
        .GetField("system", BindingFlags.NonPublic | BindingFlags.Static)!
-       .GetValue(null);
+       .GetValue(null!) as FMOD.Studio.System;
 #endif
     static readonly string[] s_banned = ["char", "env", "game", "menu", "sound", "sfx", "ui"];
 
@@ -70,7 +82,7 @@ static class Searcher
         Audio.Play(path);
     }
 
-    static bool HasSongGuids(ZipEntry x) => HasSongGuids(x.FileName);
+    static bool HasSongGuids(ZipEntry x) => x.FileName is { } fileName && HasSongGuids(fileName);
 
     static bool HasSongGuids(string x) => x.EndsWith(".guids.txt", StringComparison.InvariantCultureIgnoreCase);
 
@@ -124,22 +136,23 @@ static class Searcher
         const string Prefix = "guid://";
         EventDescription? ret = null;
 
-        if (path is null || Audio.cachedEventDescriptions.TryGetValue(path, out ret))
+        if (path is null ||
+            Audio.cachedEventDescriptions is { } descriptions && descriptions.TryGetValue(path, out ret))
             return ret;
 #if NETCOREAPP
-        var result = Audio.cachedModEvents.TryGetValue(path, out ret) ? RESULT.OK :
-            path.StartsWith(Prefix) ? Audio.System.getEventByID(new(path[Prefix.Length..]), out ret) :
-            Audio.System.getEvent(path, out ret);
+        var result = Audio.cachedModEvents is { } events && events.TryGetValue(path, out ret) ? RESULT.OK :
+            path.StartsWith(Prefix) ? Audio.System?.getEventByID(new(path[Prefix.Length..]), out ret) :
+            Audio.System?.getEvent(path, out ret);
 #else
         var result = path.StartsWith(Prefix)
-            ? s_system.getEventByID(new(path[Prefix.Length..]), out ret)
-            : s_system.getEvent(path, out ret);
+            ? s_system?.getEventByID(new(path[Prefix.Length..]), out ret)
+            : s_system?.getEvent(path, out ret);
 #endif
-        if (result is not RESULT.OK)
+        if (result is not RESULT.OK || ret is null)
             return ret;
 
         _ = ret.loadSampleData(); // I have no idea if this method is pure or not, but I call it anyway.
-        Audio.cachedEventDescriptions.Add(path, ret);
+        Audio.cachedEventDescriptions?.Add(path, ret);
         return ret;
     }
 #pragma warning disable CA1859
@@ -149,9 +162,7 @@ static class Searcher
         static void Finish(List<string> list)
         {
             list.ForEach(x => Logger.Log(nameof(Gramophone), x));
-
-            if (Audio.CurrentMusic != s_previous)
-                Audio.SetMusic(s_previous);
+            _ = (Audio.CurrentMusic != s_previous).Then(() => Audio.SetMusic(s_previous.OrEmpty()));
         }
 
         static bool Desired(string x) => x.StartsWith("event:/") && !Array.Exists(s_banned, x.Contains);
@@ -174,6 +185,10 @@ static class Searcher
         static IEnumerable<string> Read(ZipEntry x)
         {
             using var stream = x.OpenReader();
+
+            if (stream is null)
+                return [];
+
             using StreamReader reader = new(stream);
             return reader.ReadToEnd().Split();
         }
@@ -203,17 +218,5 @@ static class Searcher
            .OrderBy(Self, StringComparer.OrdinalIgnoreCase)
            .ToList()
            .Peek(Finish);
-    }
-
-    sealed class CharComparer : IEqualityComparer<char>
-    {
-        /// <summary>Gets the comparer.</summary>
-        public static CharComparer Default { get; } = new();
-
-        /// <inheritdoc />
-        public bool Equals(char x, char y) => x.IsWhitespace() && y.IsWhitespace() || x.ToUpper() == y.ToUpper();
-
-        /// <inheritdoc />
-        public int GetHashCode(char obj) => obj.IsWhitespace() ? '\t' : obj.ToUpper();
     }
 }

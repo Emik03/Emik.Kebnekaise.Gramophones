@@ -43,21 +43,21 @@ static class Gramophone
 
     static string ShuffleText => Searcher.IsSorted ? Localized.Shuffle : Localized.Sort;
 
-    static Celeste.AudioState? AudioSession => (Engine.Scene as Level)?.Session.Audio;
+    static Celeste.AudioState? AudioSession => Engine.Scene is Level { Session.Audio: { } audio } ? audio : null;
 
     internal static void Apply(AudioState.orig_Apply? orig, Celeste.AudioState? self) =>
-        (!IsPlaying).Then(orig)?.Invoke(self);
+        (!IsPlaying).Then(orig)?.Invoke(self!);
 
     internal static void Ambience() => Ambience(!IsPaused ?? true);
 
     internal static void Ambience(bool x)
     {
-        Audio.CurrentAmbienceEventInstance.setPaused(x);
+        Audio.CurrentAmbienceEventInstance?.setPaused(x);
 
         if (x)
-            Audio.CurrentAmbienceEventInstance.stop(STOP_MODE.ALLOWFADEOUT);
+            Audio.CurrentAmbienceEventInstance?.stop(STOP_MODE.ALLOWFADEOUT);
         else
-            Audio.CurrentAmbienceEventInstance.start();
+            Audio.CurrentAmbienceEventInstance?.start();
     }
 
     internal static void Inhibit() => Inhibit(!GramophoneModule.Settings.Inhibit);
@@ -109,7 +109,7 @@ static class Gramophone
     {
         _ = Searcher.Song;
         Previous = path;
-        return !IsPlaying && (orig?.Invoke(path, startPlaying, allowFadeOut) ?? false);
+        return !IsPlaying && (orig?.Invoke(path!, startPlaying, allowFadeOut) ?? false);
     }
 
     internal static void Update(OnCassetteBlockManager.orig_Update orig, CassetteBlockManager self)
@@ -118,9 +118,9 @@ static class Gramophone
             Replace(self, Audio.CurrentMusicEventInstance, true);
         else if (s_hasOverridenCassette && Engine.Scene is Level { Session.Area.ID: var id })
 #if NETCOREAPP
-            Replace(self, Audio.CreateInstance(AreaData.Areas[id].CassetteSong), false);
+            Replace(self, Audio.CreateInstance(AreaData.Areas?[id]?.CassetteSong ?? ""), false);
 #else
-            Replace(self, Audio.Play(AreaData.Areas[id].CassetteSong), false);
+            Replace(self, Audio.Play(AreaData.Areas?[id]?.CassetteSong ?? ""), false);
 #endif
         orig(self);
     }
@@ -163,7 +163,7 @@ static class Gramophone
             s_old?.Select(menu.Add).Enumerate();
         }
 
-        void Enter() => Audio.EndSnapshot(pause);
+        void Enter() => Audio.EndSnapshot(pause!);
 
         void EnterSong()
         {
@@ -171,7 +171,7 @@ static class Gramophone
             TextInput.OnInput += Input;
         }
 
-        void Leave() => Audio.ResumeSnapshot(pause);
+        void Leave() => Audio.ResumeSnapshot(pause!);
 
         void LeaveSong()
         {
@@ -200,13 +200,13 @@ static class Gramophone
                 GramophoneModule.Settings.Inhibit = old;
             }
 
-            return new Slider(p.Name(), i => Math.Round(i / step, 2).Stringify(), min, max, (int)(cur * step))
-               .Change(Change)
-               .Enter(Enter)
-               .Leave(Leave);
+            return new Slider(p.Name(), i => $"{Math.Round(i / step, 2)}", min, max, (int)(cur * step))
+               .Change(Change)!
+               .Enter(Enter)!
+               .Leave(Leave)!;
         }
 
-        menu.AddItems(song.Change(Change).Enter(EnterSong).Leave(LeaveSong), description, Update);
+        menu.AddItems(song.Change(Change)!.Enter(EnterSong)!.Leave(LeaveSong)!, description, Update);
         return menu;
     }
 
@@ -267,12 +267,12 @@ static class Gramophone
 
     static void Set(string? path, bool isPlaying)
     {
-        if (AudioSession is not { } audio)
+        if (AudioSession is not { Music: { } music } audio)
             return;
 
         IsPlaying = false;
-        Audio.SetMusic(path);
-        audio.Music.Event = path;
+        Audio.SetMusic(path.OrEmpty());
+        music.Event = path.OrEmpty();
         audio.Apply();
         IsPlaying = isPlaying;
     }
@@ -305,7 +305,7 @@ static class Gramophone
     {
         int NewValue() => (int)(Searcher.Score(song.Values.Nth(0)?.Item1) * 100);
 
-        if (song is null || description is null)
+        if (song is null or { Values: null } || description is null)
             return;
 
         var currentIndex = Searcher.Song.IndexOf(Current);
@@ -316,7 +316,7 @@ static class Gramophone
         var upper = song.Values.Count;
 
         song.Index = Searcher.IsSearching ? 0 : currentIndex;
-        song.OnValueChange(song.Index);
+        song.OnValueChange?.Invoke(song.Index);
         upper.For(i => song.Values[i] = new(Friendly(i), i)).Enumerate();
 
         description.Title = DescriptionText
@@ -324,10 +324,8 @@ static class Gramophone
            .Replace(Localized.PercentTemplate, $"{NewValue()}")
            .Replace(Localized.UpperTemplate, $"{upper + 1}");
 
-        var container = description.Container;
-        var containerIndex = container.IndexOf(description);
-
-        if (containerIndex is -1)
+        if (description.Container is not { } container ||
+            container.IndexOf(description) is var containerIndex && containerIndex is -1)
             return;
 
         container.Remove(description);
@@ -335,13 +333,13 @@ static class Gramophone
     }
 
     static bool IsBanned(this EventInstance? instance) =>
-        instance?.getDescription(out var a) is RESULT.OK && a.getPath(out var b) is RESULT.OK && b.IsBanned();
+        instance?.getDescription(out var a) is RESULT.OK && a?.getPath(out var b) is RESULT.OK && b.IsBanned();
 
     internal static string Friendly(int i) => MakeFriendly(Searcher.Song[i]);
 
     internal static string MakeFriendly(string? s) =>
         s is null ? "" :
-        s_friendly.TryGetValue(s, out var val) ? val :
+        s_friendly.TryGetValue(s, out var val) ? val.OrEmpty() :
         s_friendly[s] = s.Split(":/").LastOrDefault()?.StringHell() ?? Localized.None;
 
     static string StringHell(this string wide)

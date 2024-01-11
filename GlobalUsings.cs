@@ -29,6 +29,7 @@ global using System.Threading;
 global using System.Threading.Tasks;
 global using Celeste;
 global using Celeste.Mod;
+global using CommunityToolkit.Diagnostics;
 global using Emik;
 global using Emik.Morsels;
 global using Emik.Results;
@@ -55,6 +56,8 @@ global using OnParameterInstance = On.FMOD.Studio.ParameterInstance;
 global using Slider = Celeste.TextMenu.Slider;
 global using TextMenu = Celeste.TextMenu;
 global using ZipFile = Ionic.Zip.ZipFile;
+
+namespace CommunityToolkit.Diagnostics { }
 
 namespace RemoveReference { }
 
