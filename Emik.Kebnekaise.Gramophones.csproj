@@ -13,6 +13,6 @@
         <FileVersion>2.1</FileVersion>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Emik.Results" Version="2.1.1" PrivateAssets="all"/>
+        <PackageReference Include="Emik.Results" Version="3.0.1" PrivateAssets="all"/>
     </ItemGroup>
 </Project>
