@@ -41,7 +41,7 @@ Gramophone_Sort=
 o pali kama e nanpa
 
 Gramophone_Step=
-nanpa pi wan Pemoto
+kipisi lon FMOD
 
 Gramophone_Stop=
 o pake
